@@ -76,7 +76,7 @@ func (ev *Evaluator) Init() func(string) []interface{} {
 		tmp := ""
 		group := 0
 		for i := 0; i < len(input); i++ {
-			if ev.IsAgrupation(string(input[i])) {
+			if ev.IsOpeningAgrupation(input[i]) {
 				group++
 				j := i + 1
 				t := ""
@@ -91,15 +91,10 @@ func (ev *Evaluator) Init() func(string) []interface{} {
 						break
 					}
 					t += string(input[j])
-					fmt.Printf("letra: %s\n", string(input[j]))
-					fmt.Printf("texto: %s\n", t)
-					fmt.Printf("groups: %d\n", group)
-					fmt.Println("--------------------------")
 					j++
 				}
 				// delete substring
 				i = j
-				fmt.Printf("%v\n")
 				result = append(result, separator(t))
 			} else {
 				tmp += string(input[i])
@@ -116,7 +111,7 @@ func (ev *Evaluator) Init() func(string) []interface{} {
 
 func main() {
 	var ev Evaluator
-	ev.alphabet = []string{"0", "1"}
+	ev.alphabet = []string{"0", "1", "10"}
 	s := ev.Init()
-	fmt.Printf("%v\n", s("(0|(10))0*(01)"))
+	fmt.Printf("%v\n", s("(0|(10))0*(22)"))
 }
