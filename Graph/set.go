@@ -1,42 +1,50 @@
-package main // TODO: change main
+package Graph // TODO: change main
 
 // Set is a struct that defines a set
 type Set struct {
-	list map[int]bool
+	list map[*Automata]bool
 }
 
 // NewSet returns a new set
 func NewSet() *Set {
 	s := &Set{}
-	s.list = make(map[int]bool)
+	s.list = make(map[*Automata]bool)
+	return s
+}
+
+func NewSetFrom(I ...*Automata) *Set {
+	s := NewSet()
+	for _, i := range I {
+		s.Add(i)
+	}
 	return s
 }
 
 // Has saids if i is in the set
-func (set *Set) Has(i int) bool {
+func (set *Set) Has(i *Automata) bool {
 	_, ok := set.list[i]
 	return ok
 }
 
 // Add adds i into the set
-func (set *Set) Add(i int) {
-	set.list[i] = true
+func (set *Set) Add(b *Automata) {
+	set.list[b] = true
 }
 
 // Remove removes i inside set
-func (set *Set) Remove(i int) {
+func (set *Set) Remove(i *Automata) {
 	delete(set.list, i)
 }
 
 // Adds adds multiples int to set
-func (set *Set) Adds(I ...int) {
+func (set *Set) Adds(I ...*Automata) {
 	for _, i := range I {
 		set.Add(i)
 	}
 }
 
 // Removes removes multiples int of set
-func (set *Set) Removes(I ...int) {
+func (set *Set) Removes(I ...*Automata) {
 	for _, i := range I {
 		set.Remove(i)
 	}
@@ -45,15 +53,16 @@ func (set *Set) Removes(I ...int) {
 // Union gets two sets and returns a new set with the values of both sets
 func Union(A *Set, B *Set) *Set {
 	s := NewSet()
-	for a, v := range A.list {
+
+	for k, v := range A.list {
 		if v {
-			s.Add(a)
+			s.Add(k)
 		}
 	}
 
-	for b, v := range A.list {
+	for k, v := range B.list {
 		if v {
-			s.Add(b)
+			s.Add(k)
 		}
 	}
 
