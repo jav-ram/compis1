@@ -14,6 +14,39 @@ type Automata struct {
 // State automata
 type State Automata
 
+// MergeTrans Merge two transitions
+func MergeTrans(m1, m2 map[*Automata]map[string][]*Automata) map[*Automata]map[string][]*Automata {
+	r := map[*Automata]map[string][]*Automata{}
+
+	for k, m := range m1 {
+		for mc, ma := range m {
+			if r[k] == nil {
+				t := map[string][]*Automata{mc: ma}
+				r[k] = t
+			} else {
+				t := r[k]
+				t[mc] = append(t[mc], ma...)
+				r[k] = t
+			}
+		}
+	}
+
+	for k, m := range m2 {
+		for mc, ma := range m {
+			if r[k] == nil {
+				t := map[string][]*Automata{mc: ma}
+				r[k] = t
+			} else {
+				t := r[k]
+				t[mc] = append(t[mc], ma...)
+				r[k] = t
+			}
+		}
+	}
+
+	return r
+}
+
 func NewAutomata() *Automata {
 	a := &Automata{}
 	a.Trans = map[*Automata]map[string][]*Automata{}
@@ -153,5 +186,64 @@ func NewAFNKlean(sigma []string, aut *Automata) *Automata {
 func NewAFNKConcat(sigma []string, first *Automata, second *Automata) *Automata {
 	r := NewAutomata()
 	r = first.AddBySide(second)
+	return r
+}
+
+//NewAFNKConcat get Concat AFN
+func NewAFNKOr(sigma []string, a *Automata, b *Automata) *Automata {
+	r := NewAutomata()
+	s := NewAutomata()
+	f := NewAutomata()
+
+	r.Q = *NewSetFrom(s, f, a, b)
+	r.Qo = *NewSetFrom(s)
+	r.F = *NewSetFrom(f)
+	r.Sigma = sigma
+
+	// primeras dos trancisiones
+	tmp1 := NewAutomata()
+	tmp1 = s.AddBySide(a)
+	tmp2 := NewAutomata()
+	tmp2 = s.AddBySide(b)
+	r.Trans = MergeTrans(r.Trans, a.Trans)
+	r.Trans = MergeTrans(r.Trans, b.Trans)
+
+	t := map[string][]*Automata{"": []*Automata{}}
+	t[""] = append(t[""], tmp1.Trans[s][""]...)
+	t[""] = append(t[""], tmp2.Trans[s][""]...)
+	r.Trans[s] = t
+
+	// segundas trancisión
+	for kf := range a.F.list {
+		for ko := range f.Qo.list {
+			if r.Trans[kf] == nil {
+				t := map[string][]*Automata{"": []*Automata{ko}}
+				r.Trans[kf] = t
+			} else {
+				t := r.Trans[kf]
+				t[""] = append(t[""], ko)
+				r.Trans[kf] = t
+			}
+		}
+	}
+
+	for kf := range b.F.list {
+		for ko := range f.Qo.list {
+			if r.Trans[kf] == nil {
+				t := map[string][]*Automata{"": []*Automata{ko}}
+				r.Trans[kf] = t
+			} else {
+				t := r.Trans[kf]
+				t[""] = append(t[""], ko)
+				r.Trans[kf] = t
+			}
+		}
+	}
+
+	fmt.Printf("qo %v\n", r.Qo)
+	fmt.Printf("qf %v\n", r.F)
+	fmt.Printf("tr %v\n", r.Trans)
+	fmt.Printf("qo %v\n", f.Qo.list)
+
 	return r
 }

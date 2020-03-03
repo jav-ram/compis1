@@ -207,8 +207,9 @@ func main() {
 	fmt.Printf("%v\n", getList)
 	node := ev.getTree(getList)
 	fmt.Printf("%v\n", node.Rchild.Lchild) */
-	read := graph.SingleAFN([]string{"a"}, "0")
-	op := graph.NewAFNKlean([]string{"a"}, read)
-	r := op.Emulate("000")
+	a := graph.SingleAFN([]string{"a"}, "0")
+	b := graph.SingleAFN([]string{"a"}, "1")
+	op := graph.NewAFNKOr([]string{"a"}, a, b)
+	r := op.Emulate("2")
 	fmt.Printf("%v\n", r)
 }
