@@ -182,14 +182,14 @@ func NewAFNKlean(sigma []string, aut *Automata) *Automata {
 	return r
 }
 
-//NewAFNKConcat get Concat AFN
-func NewAFNKConcat(sigma []string, first *Automata, second *Automata) *Automata {
+//NewAFNConcat get Concat AFN
+func NewAFNConcat(sigma []string, first *Automata, second *Automata) *Automata {
 	r := NewAutomata()
 	r = first.AddBySide(second)
 	return r
 }
 
-//NewAFNKConcat get Concat AFN
+//NewAFNKOr get Concat AFN
 func NewAFNKOr(sigma []string, a *Automata, b *Automata) *Automata {
 	r := NewAutomata()
 	s := NewAutomata()
@@ -240,10 +240,19 @@ func NewAFNKOr(sigma []string, a *Automata, b *Automata) *Automata {
 		}
 	}
 
-	fmt.Printf("qo %v\n", r.Qo)
-	fmt.Printf("qf %v\n", r.F)
-	fmt.Printf("tr %v\n", r.Trans)
-	fmt.Printf("qo %v\n", f.Qo.list)
+	return r
+}
 
+// NewAFNSum un automata de +
+func NewAFNSum(sigma []string, aut *Automata) *Automata {
+	f := NewAFNKlean(sigma, aut)
+	r := NewAFNConcat(sigma, aut, f)
+	return r
+}
+
+// NewAFNQuestion un automata de ?
+func NewAFNQuestion(sigma []string, aut *Automata) *Automata {
+	f := SingleAFN(sigma, "")
+	r := NewAFNKOr(sigma, aut, f)
 	return r
 }

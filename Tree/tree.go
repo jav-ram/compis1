@@ -18,12 +18,28 @@ func NewNode(value interface{}, isOperation bool, isLexema bool) *Node {
 	return n
 }
 
+func (node *Node) IsOperation() bool {
+	return node.isOperation
+}
+
+func (node *Node) IsLexema() bool {
+	return node.isLexema
+}
+
+func (child *Node) GetParent() *Node {
+	return child.parent
+}
+
 func (child *Node) SetParent(parent *Node) {
 	child.parent = parent
 }
 
 func (root *Node) GetValue() interface{} {
 	return root.value
+}
+
+func (root *Node) SetValue(value interface{}) {
+	root.value = value
 }
 
 func NewOpNode(value interface{}) *Node {

@@ -2,7 +2,7 @@ package Graph
 
 import "fmt"
 
-func (aut *Automata) eclouser(state *Set) *Set {
+func (aut *Automata) eclouser(state *Set, visited *Set) *Set {
 	r := NewSet()
 
 	fmt.Printf("k: %v\n", state.list)
@@ -10,8 +10,15 @@ func (aut *Automata) eclouser(state *Set) *Set {
 		r.Adds(k)
 		for c, a := range aut.Trans[k] {
 			if c == "" {
-				s := NewSetFrom(a...)
-				r = Union(r, aut.eclouser(s))
+				b := []*Automata{}
+				for _, t := range a {
+					if !visited.Has(t) {
+						visited.Add(t)
+						b = append(b, t)
+					}
+				}
+				s := NewSetFrom(b...)
+				r = Union(r, aut.eclouser(s, visited))
 			}
 		}
 	}
@@ -34,7 +41,7 @@ func (aut *Automata) move(state *Set, t string) *Set {
 }
 
 func (aut *Automata) Emulate(text string) *Set {
-	S := aut.eclouser(&aut.Qo)
+	S := aut.eclouser(&aut.Qo, NewSet())
 	for _, c := range text {
 		m := aut.move(S, string(c))
 		fmt.Println("------------------")
@@ -43,7 +50,7 @@ func (aut *Automata) Emulate(text string) *Set {
 		fmt.Printf("s: %v\n", S)
 		fmt.Printf("c: %v\n", string(c))
 		fmt.Printf("m: %v\n", m)
-		S = aut.eclouser(m)
+		S = aut.eclouser(m, NewSet())
 		fmt.Printf("s: %v\n", S)
 		fmt.Printf("F: %v\n", aut.F)
 		fmt.Println("------------------")

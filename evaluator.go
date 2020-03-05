@@ -104,6 +104,22 @@ func (ev *Evaluator) separator(input string) (result []interface{}) {
 	return result
 }
 
+func GetAutomata(node *tree.Node) *tree.Node {
+	switch node.GetValue().(type) {
+	case graph.Automata:
+		{
+			return node
+		}
+	default:
+		{
+			value := fmt.Sprintf("%v", node.GetValue())
+			single := graph.SingleAFN(nil, value)
+			node.SetValue(single)
+			return node
+		}
+	}
+}
+
 func search(list []interface{}, s interface{}) int {
 	for i, l := range list {
 		if l == s {
@@ -197,19 +213,50 @@ func (ev *Evaluator) getTree(input []interface{}) *tree.Node {
 	return input[0].(*tree.Node)
 }
 
+func InOrder(node *tree.Node) *tree.Node {
+	if node == nil {
+		return nil
+	}
+	l := InOrder(node.Lchild)
+	//r := InOrder(node.Rchild)
+	if node.IsOperation() {
+		switch node.GetValue() {
+		case "*":
+			{
+				l = GetAutomata(l)
+				newValue := graph.NewAFNKlean(nil, l.GetValue().(*graph.Automata))
+				node.SetValue(newValue)
+				return node
+			}
+
+		}
+	}
+	return node
+}
+
 func main() {
 	/* var ev Evaluator
 	ev.operators = []string{"*", "+", ".", "|", "?"}
 	ev.alphabet = []string{"0", "1"}
 	ev.agrupation = []string{"()"}
-	getList := ev.separator("(0|(1*))")
-	// lexTree := getList("(0|(10))0*(22)")
+	getList := ev.separator("(0*)*")
 	fmt.Printf("%v\n", getList)
 	node := ev.getTree(getList)
-	fmt.Printf("%v\n", node.Rchild.Lchild) */
-	a := graph.SingleAFN([]string{"a"}, "0")
-	b := graph.SingleAFN([]string{"a"}, "1")
-	op := graph.NewAFNKOr([]string{"a"}, a, b)
-	r := op.Emulate("2")
+	fmt.Printf("%v\n", node)
+	afn := InOrder(node)
+	fmt.Printf("%v\n", afn.GetValue())
+	a := afn.GetValue().(*graph.Automata)
+	r := a.Emulate("00")
+	fmt.Printf("%v\n", r) */
+	a := graph.SingleAFN([]string{"a"}, "a")
+	aklean := graph.NewAFNKlean(nil, a)
+	b := graph.SingleAFN(nil, "b")
+
+	c := graph.NewAFNKOr(nil, aklean, b)
+	op := graph.NewAFNKlean(nil, c)
+	r := op.Emulate("i")
 	fmt.Printf("%v\n", r)
+	//op := graph.NewAFNKOr([]string{"1"}, a, b)
+	//klean := graph.NewAFNConcat([]string{"a"}, op, a)
+
 }
