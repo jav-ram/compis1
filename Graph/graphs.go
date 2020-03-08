@@ -1,5 +1,10 @@
 package Graph
 
+import (
+	"fmt"
+	"os"
+)
+
 // Automata is the struct of a automata machine
 type Automata struct {
 	Q     Set
@@ -11,6 +16,19 @@ type Automata struct {
 
 // State automata
 type State Automata
+
+func PrintAutomata(trans string) {
+	f, err := os.Create("python/graph.txt")
+	if err != nil {
+		fmt.Println(err)
+		f.Close()
+		return
+	}
+	t := fmt.Sprintf("%v", trans)
+
+	fmt.Fprintln(f, t)
+
+}
 
 // MergeTrans Merge two transitions
 func MergeTrans(m1, m2 map[*Automata]map[string][]*Automata) map[*Automata]map[string][]*Automata {

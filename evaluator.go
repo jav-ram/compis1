@@ -2,6 +2,7 @@ package main // TODO: change main
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	graph "github.com/ram16230/compis1/Graph"
@@ -270,14 +271,62 @@ func InOrder(node *tree.Node) *tree.Node {
 	return node
 }
 
-func PrettyPrint(value map[*graph.Automata]map[string][]*graph.Automata) {
+func PrettyPrint(aut *graph.Automata) {
+	f, err := os.Create("python/graph.txt")
+	if err != nil {
+		fmt.Println(err)
+		f.Close()
+		return
+	}
+	value := aut.Trans
+
+	tmp := map[*graph.Automata]int{}
+	qo := []int{}
+	qf := []int{}
+	i := 0
 	for k := range value {
+		_, ok := tmp[k]
+		if !ok {
+			tmp[k] = i
+			if aut.Qo.Has(k) {
+				qo = append(qo, i)
+			}
+			if aut.F.Has(k) {
+				qf = append(qf, i)
+			}
+			i++
+		}
 		for c, is := range value[k] {
-			for i := range is {
-				fmt.Printf("x: [%v][%s] => [%v]\n", &k, c, &is[i])
+			if c == "" {
+				c = "''"
+			}
+			for _, j := range is {
+				_, ok := tmp[j]
+				if !ok {
+					tmp[j] = i
+					if aut.Qo.Has(j) {
+						qo = append(qo, i)
+					}
+					if aut.F.Has(j) {
+						qf = append(qf, i)
+					}
+					i++
+				}
+				fmt.Printf("x: [%v][%s] => [%v]\n", tmp[k], c, tmp[j])
+				t := fmt.Sprintf("%v,%v,%v", tmp[k], c, tmp[j])
+				fmt.Fprintln(f, t)
 			}
 		}
 	}
+	fs, err := os.Create("python/important.txt")
+	if err != nil {
+		fmt.Println(err)
+		fs.Close()
+		return
+	}
+	t := fmt.Sprintf("%v\n%v", qo, qf)
+	fmt.Fprintln(fs, t)
+	fmt.Printf("FFFFFF: %v\n", aut.F)
 }
 
 func main() {
@@ -291,6 +340,8 @@ func main() {
 	afn := InOrder(node)
 
 	a := afn.GetValue().(*graph.Automata)
+	fmt.Printf("FFFFFF: %v\n", a.F)
+	PrettyPrint(a)
 	var emtxt string
 	fmt.Scanln(&emtxt)
 	r := a.Emulate(emtxt)
