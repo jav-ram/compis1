@@ -20,8 +20,7 @@ type Token struct {
 }
 
 func remove(s []interface{}, i int) []interface{} {
-	s[i] = s[len(s)-1]
-	return s[:len(s)-1]
+	return append(s[:i], s[i+1:]...)
 }
 
 // IsOpeningAgrupation gets if is an opening
@@ -78,7 +77,6 @@ func (ev *Evaluator) separator(input string) (result []interface{}) {
 			j := i + 1
 			t := ""
 			for j < len(input) {
-				fmt.Printf("index: %d\n", j)
 				if ev.IsOpeningAgrupation(input[j]) {
 					group++
 				} else if ev.IsClosingAgrupation(input[j]) {
@@ -132,6 +130,7 @@ func search(list []interface{}, s interface{}) int {
 func (ev *Evaluator) getTree(input []interface{}) *tree.Node {
 
 	for i := 0; i < len(input); i++ {
+		fmt.Printf("input: %v \n", input)
 		switch input[i].(type) {
 		case []interface{}:
 			{
@@ -154,6 +153,7 @@ func (ev *Evaluator) getTree(input []interface{}) *tree.Node {
 						l.SetParent(n)
 						n.AddLeftChild(l)
 						input[idx-1] = n
+						fmt.Printf("input*: %v \n", input)
 						input = remove(input, idx)
 					}
 
@@ -178,7 +178,8 @@ func (ev *Evaluator) getTree(input []interface{}) *tree.Node {
 					}
 
 					for search(input, ".") > 0 {
-						n := tree.NewOpNode(c)
+						fmt.Printf("input.: %v \n", input)
+						n := tree.NewOpNode(".")
 						idx := search(input, ".")
 						l := ev.getTree([]interface{}{input[idx-1]})
 						l.SetParent(n)
@@ -202,7 +203,6 @@ func (ev *Evaluator) getTree(input []interface{}) *tree.Node {
 						input = remove(input, idx+1)
 						input = remove(input, idx)
 					}
-
 				} else {
 					n := tree.NewLxNode(input[i].(string))
 					input[i] = n
@@ -218,44 +218,91 @@ func InOrder(node *tree.Node) *tree.Node {
 		return nil
 	}
 	l := InOrder(node.Lchild)
-	//r := InOrder(node.Rchild)
+	r := InOrder(node.Rchild)
 	if node.IsOperation() {
+		fmt.Printf("node: %v\n\tl:%v\n\tr:%v\n", node.GetValue(), l.GetValue(), r)
 		switch node.GetValue() {
+		// Single Operators
 		case "*":
 			{
-				l = GetAutomata(l)
-				newValue := graph.NewAFNKlean(nil, l.GetValue().(*graph.Automata))
+				lAut := l.GetValue().(*graph.Automata)
+				fmt.Printf("left *: %v\n", lAut)
+				newValue := graph.NewAFNKlean(nil, lAut)
+				node.SetValue(newValue)
+				node.Lchild = nil
+				return node
+			}
+		case "+":
+			{
+				lAut := l.GetValue().(*graph.Automata)
+				newValue := graph.NewAFNSum(nil, lAut)
+				node.SetValue(newValue)
+				node.Lchild = nil
+				return node
+			}
+		case "?":
+			{
+				lAut := l.GetValue().(*graph.Automata)
+				newValue := graph.NewAFNQuestion(nil, lAut)
 				node.SetValue(newValue)
 				return node
 			}
-
+		case "|":
+			{
+				lAut := l.GetValue().(*graph.Automata)
+				rAut := r.GetValue().(*graph.Automata)
+				newValue := graph.NewAFNKOr(nil, lAut, rAut)
+				node.SetValue(newValue)
+				return node
+			}
+		case ".":
+			{
+				lAut := l.GetValue().(*graph.Automata)
+				rAut := r.GetValue().(*graph.Automata)
+				newValue := graph.NewAFNConcat(nil, lAut, rAut)
+				node.SetValue(newValue)
+				return node
+			}
 		}
+	} else {
+		return GetAutomata(node)
 	}
 	return node
 }
 
+func PrettyPrint(value map[*graph.Automata]map[string][]*graph.Automata) {
+	for k := range value {
+		for c, is := range value[k] {
+			for i := range is {
+				fmt.Printf("x: [%v][%s] => [%v]\n", &k, c, &is[i])
+			}
+		}
+	}
+}
+
 func main() {
-	/* var ev Evaluator
+	var ev Evaluator
 	ev.operators = []string{"*", "+", ".", "|", "?"}
 	ev.alphabet = []string{"0", "1"}
 	ev.agrupation = []string{"()"}
-	getList := ev.separator("(0*)*")
-	fmt.Printf("%v\n", getList)
+	getList := ev.separator("(0|1)*.1")
 	node := ev.getTree(getList)
-	fmt.Printf("%v\n", node)
+	fmt.Printf("nodesssssssss: %v\n", node)
 	afn := InOrder(node)
-	fmt.Printf("%v\n", afn.GetValue())
+
 	a := afn.GetValue().(*graph.Automata)
-	r := a.Emulate("00")
-	fmt.Printf("%v\n", r) */
-	a := graph.SingleAFN([]string{"a"}, "a")
+	var emtxt string
+	fmt.Scanln(&emtxt)
+	r := a.Emulate(emtxt)
+	fmt.Printf("%v\n", r)
+	/* a := graph.SingleAFN([]string{"a"}, "a")
 	aklean := graph.NewAFNKlean(nil, a)
 	b := graph.SingleAFN(nil, "b")
 
 	c := graph.NewAFNKOr(nil, aklean, b)
 	op := graph.NewAFNKlean(nil, c)
 	r := op.Emulate("i")
-	fmt.Printf("%v\n", r)
+	fmt.Printf("%v\n", r) */
 	//op := graph.NewAFNKOr([]string{"1"}, a, b)
 	//klean := graph.NewAFNConcat([]string{"a"}, op, a)
 

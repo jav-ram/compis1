@@ -1,7 +1,5 @@
 package Graph
 
-import "fmt"
-
 // Automata is the struct of a automata machine
 type Automata struct {
 	Q     Set
@@ -155,7 +153,6 @@ func NewAFNKlean(sigma []string, aut *Automata) *Automata {
 	// outside
 	for to := range s.Qo.list {
 		for tf := range l.F.list {
-			fmt.Printf("aaaaaaaaaaaaa: %v\n", r.Trans[to])
 			if r.Trans[to] == nil {
 				t := map[string][]*Automata{"": []*Automata{tf}}
 				r.Trans[to] = t
@@ -164,7 +161,6 @@ func NewAFNKlean(sigma []string, aut *Automata) *Automata {
 				t[""] = append(t[""], tf)
 				r.Trans[to] = t
 			}
-			fmt.Printf("aaaaaaaaaaaaa: %v\n", r.Trans[to])
 		}
 	}
 
@@ -176,8 +172,6 @@ func NewAFNKlean(sigma []string, aut *Automata) *Automata {
 			r.Trans[tf] = t
 		}
 	}
-
-	fmt.Printf("trans %v\n", r.Trans)
 
 	return r
 }
