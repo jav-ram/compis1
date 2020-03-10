@@ -132,7 +132,6 @@ func search(list []interface{}, s interface{}) int {
 func (ev *Evaluator) getTree(input []interface{}) *tree.Node {
 
 	for i := 0; i < len(input); i++ {
-		fmt.Printf("input: %v \n", input)
 		switch input[i].(type) {
 		case []interface{}:
 			{
@@ -155,7 +154,6 @@ func (ev *Evaluator) getTree(input []interface{}) *tree.Node {
 						l.SetParent(n)
 						n.AddLeftChild(l)
 						input[idx-1] = n
-						fmt.Printf("input*: %v \n", input)
 						input = remove(input, idx)
 					}
 
@@ -180,7 +178,6 @@ func (ev *Evaluator) getTree(input []interface{}) *tree.Node {
 					}
 
 					for search(input, ".") > 0 {
-						fmt.Printf("input.: %v \n", input)
 						n := tree.NewOpNode(".")
 						idx := search(input, ".")
 						l := ev.getTree([]interface{}{input[idx-1]})
@@ -222,13 +219,11 @@ func InOrder(node *tree.Node, sigma []string) *tree.Node {
 	l := InOrder(node.Lchild, sigma)
 	r := InOrder(node.Rchild, sigma)
 	if node.IsOperation() {
-		fmt.Printf("node: %v\n\tl:%v\n\tr:%v\n", node.GetValue(), l.GetValue(), r)
 		switch node.GetValue() {
 		// Single Operators
 		case "*":
 			{
 				lAut := l.GetValue().(*graph.Automata)
-				fmt.Printf("left *: %v\n", lAut)
 				newValue := graph.NewAFNKlean(sigma, lAut)
 				node.SetValue(newValue)
 				node.Lchild = nil

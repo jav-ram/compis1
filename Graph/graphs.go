@@ -3,6 +3,7 @@ package Graph
 import (
 	"fmt"
 	"os"
+	"reflect"
 )
 
 // Automata is the struct of a automata machine
@@ -12,6 +13,7 @@ type Automata struct {
 	Qo    Set
 	Trans map[*Automata]map[string][]*Automata
 	F     Set
+	mark  bool
 }
 
 // State automata
@@ -70,6 +72,7 @@ func NewAutomata(sigma []string) *Automata {
 	a.Q = *NewSetFrom(a)
 	a.F = *NewSetFrom(a)
 	a.Sigma = sigma
+	a.mark = false
 	return a
 }
 
@@ -135,6 +138,7 @@ func (first *Automata) AddBySide(second *Automata) *Automata {
 		first.Qo,
 		trans,
 		second.F,
+		false,
 	}
 }
 
@@ -270,56 +274,85 @@ func NewAFNQuestion(sigma []string, aut *Automata) *Automata {
 	return r
 }
 
-func NewAFDfromAFN(aut *Automata) *Automata {
-	newAut := NewAutomata(aut.Sigma)
-	fmt.Printf("sigma: %v\n", aut.Sigma)
-	i := 0
-	mark := map[*Set]int{}
-	so := aut.Qo
-	newAut.Qo = so
-	D := aut.eclouser(&so, NewSet())
-	for t := range D.list {
-		fmt.Printf("\n")
-		T := NewSetFrom(t)
-		_, ok := mark[T]
-		if !ok {
-			mark[T] = i
-			i++
-		}
-
-		for _, a := range aut.Sigma {
-			next := aut.move(&t.Q, a)
-			if len(next.list) == 0 {
-				break
-			}
-			u := aut.eclouser(aut.move(&t.Q, a), NewSet())
-
-			U := NewAutomata(aut.Sigma)
-			U.Q = *u
-			U.Q.Add(U)
-
-			if !D.Has(U) {
-				f := Intersection(&U.Q, &aut.F)
-				if len(f.list) != 0 {
-					newAut.F.Add(U)
-				}
-				D.Add(U)
-			}
-
-			if newAut.Trans[t] == nil {
-				j := map[string][]*Automata{a: []*Automata{U}}
-				newAut.Trans[t] = j
-				newAut.Q.Add(U)
-			} else {
-				j := newAut.Trans[t]
-				j[a] = append(j[a], U)
-				newAut.Trans[t] = j
-				newAut.Q.Add(U)
-			}
-			fmt.Printf("marks: %v\n", mark)
-			fmt.Printf("aut: %v\n", newAut)
+func UnMark(D []*Automata) bool {
+	for _, t := range D {
+		if !t.mark {
+			return true
 		}
 	}
-	newAut.Q = *D
+
+	return false
+}
+
+func GetUnMark(D []*Automata) *Automata {
+	for _, t := range D {
+		if !t.mark {
+			return t
+		}
+	}
+
+	return nil
+}
+
+func NewAFDfromAFN(aut *Automata) *Automata {
+	newAut := NewAutomata(aut.Sigma)
+	so := aut.eclouser(&aut.Qo, NewSet())
+	qo := NewAutomata(aut.Sigma)
+	qo.Q = *Union(&qo.Q, so)
+	newAut.Qo = qo.Q
+	D := []*Automata{}
+	D = append(D, qo)
+
+	for UnMark(D) {
+		fmt.Printf("D: %v\n", UnMark(D))
+		T := GetUnMark(D)
+		T.mark = true
+
+		for _, a := range aut.Sigma {
+			U := aut.eclouser(aut.move(&T.Q, a), NewSet())
+			u := NewAutomata(aut.Sigma)
+			u.Q = *U
+
+			count := 0
+			for _, p := range D {
+				if reflect.DeepEqual(p.Q.list, u.Q.list) {
+					count++
+				}
+			}
+
+			if count == 0 {
+				D = append(D, u)
+
+				if newAut.Trans[T] == nil {
+					y := map[string][]*Automata{a: []*Automata{u}}
+					newAut.Trans[T] = y
+				} else {
+					y := newAut.Trans[T]
+					y[a] = append(y[a], u)
+					newAut.Trans[T] = y
+				}
+
+			} else {
+				for _, p := range D {
+					if reflect.DeepEqual(p.Q.list, u.Q.list) {
+						if newAut.Trans[T] == nil {
+							y := map[string][]*Automata{a: []*Automata{p}}
+							newAut.Trans[T] = y
+						} else {
+							y := newAut.Trans[T]
+							y[a] = append(y[a], p)
+							newAut.Trans[T] = y
+						}
+					}
+				}
+			}
+
+			if len(Intersection(U, &aut.F).list) != 0 {
+				newAut.F = *Union(&newAut.F, NewSetFrom(u))
+			}
+
+		}
+	}
+	newAut.Q = *NewSetFrom(D...)
 	return newAut
 }
