@@ -215,12 +215,12 @@ func (ev *Evaluator) getTree(input []interface{}) *tree.Node {
 	return input[0].(*tree.Node)
 }
 
-func InOrder(node *tree.Node) *tree.Node {
+func InOrder(node *tree.Node, sigma []string) *tree.Node {
 	if node == nil {
 		return nil
 	}
-	l := InOrder(node.Lchild)
-	r := InOrder(node.Rchild)
+	l := InOrder(node.Lchild, sigma)
+	r := InOrder(node.Rchild, sigma)
 	if node.IsOperation() {
 		fmt.Printf("node: %v\n\tl:%v\n\tr:%v\n", node.GetValue(), l.GetValue(), r)
 		switch node.GetValue() {
@@ -229,7 +229,7 @@ func InOrder(node *tree.Node) *tree.Node {
 			{
 				lAut := l.GetValue().(*graph.Automata)
 				fmt.Printf("left *: %v\n", lAut)
-				newValue := graph.NewAFNKlean(nil, lAut)
+				newValue := graph.NewAFNKlean(sigma, lAut)
 				node.SetValue(newValue)
 				node.Lchild = nil
 				return node
@@ -237,7 +237,7 @@ func InOrder(node *tree.Node) *tree.Node {
 		case "+":
 			{
 				lAut := l.GetValue().(*graph.Automata)
-				newValue := graph.NewAFNSum(nil, lAut)
+				newValue := graph.NewAFNSum(sigma, lAut)
 				node.SetValue(newValue)
 				node.Lchild = nil
 				return node
@@ -245,7 +245,7 @@ func InOrder(node *tree.Node) *tree.Node {
 		case "?":
 			{
 				lAut := l.GetValue().(*graph.Automata)
-				newValue := graph.NewAFNQuestion(nil, lAut)
+				newValue := graph.NewAFNQuestion(sigma, lAut)
 				node.SetValue(newValue)
 				return node
 			}
@@ -253,7 +253,7 @@ func InOrder(node *tree.Node) *tree.Node {
 			{
 				lAut := l.GetValue().(*graph.Automata)
 				rAut := r.GetValue().(*graph.Automata)
-				newValue := graph.NewAFNKOr(nil, lAut, rAut)
+				newValue := graph.NewAFNKOr(sigma, lAut, rAut)
 				node.SetValue(newValue)
 				return node
 			}
@@ -261,7 +261,7 @@ func InOrder(node *tree.Node) *tree.Node {
 			{
 				lAut := l.GetValue().(*graph.Automata)
 				rAut := r.GetValue().(*graph.Automata)
-				newValue := graph.NewAFNConcat(nil, lAut, rAut)
+				newValue := graph.NewAFNConcat(sigma, lAut, rAut)
 				node.SetValue(newValue)
 				return node
 			}
@@ -360,25 +360,14 @@ func main() {
 	getList := ev.separator("(0|1)*.1")
 	node := ev.getTree(getList)
 	printTree(node)
-	fmt.Printf("nodesssssssss: %v\n", node)
-	afn := InOrder(node)
+	afn := InOrder(node, []string{"0", "1"})
 
 	a := afn.GetValue().(*graph.Automata)
-	fmt.Printf("FFFFFF: %v\n", a.F)
 	PrettyPrint(a)
-	var emtxt string
-	fmt.Scanln(&emtxt)
-	r := a.Emulate(emtxt)
+	afd := graph.NewAFDfromAFN(a)
+	fmt.Printf("afd: %v\n", afd)
+	PrettyPrint(afd)
+	r := a.Emulate("0")
 	fmt.Printf("%v\n", r)
-	/* a := graph.SingleAFN([]string{"a"}, "a")
-	aklean := graph.NewAFNKlean(nil, a)
-	b := graph.SingleAFN(nil, "b")
-
-	c := graph.NewAFNKOr(nil, aklean, b)
-	op := graph.NewAFNKlean(nil, c)
-	r := op.Emulate("i")
-	fmt.Printf("%v\n", r) */
-	//op := graph.NewAFNKOr([]string{"1"}, a, b)
-	//klean := graph.NewAFNConcat([]string{"a"}, op, a)
 
 }

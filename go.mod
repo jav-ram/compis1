@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/cosiner/argv v0.0.1 // indirect
-	github.com/disiqueira/gotree v1.0.0 // indirect
+	github.com/disiqueira/gotree v1.0.0
 	github.com/go-delve/delve v1.4.0 // indirect
 	github.com/google/uuid v1.1.1 // indirect
 	github.com/jeremywohl/flatten v1.0.1

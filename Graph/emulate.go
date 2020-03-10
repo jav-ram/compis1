@@ -1,5 +1,7 @@
 package Graph
 
+import "fmt"
+
 func (aut *Automata) eclouser(state *Set, visited *Set) *Set {
 	r := NewSet()
 
@@ -9,6 +11,7 @@ func (aut *Automata) eclouser(state *Set, visited *Set) *Set {
 			if c == "" {
 				b := []*Automata{}
 				for _, t := range a {
+					fmt.Printf("t: %v\n", t)
 					if !visited.Has(t) {
 						visited.Add(t)
 						b = append(b, t)

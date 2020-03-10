@@ -63,12 +63,13 @@ func MergeTrans(m1, m2 map[*Automata]map[string][]*Automata) map[*Automata]map[s
 	return r
 }
 
-func NewAutomata() *Automata {
+func NewAutomata(sigma []string) *Automata {
 	a := &Automata{}
 	a.Trans = map[*Automata]map[string][]*Automata{}
 	a.Qo = *NewSetFrom(a)
 	a.Q = *NewSetFrom(a)
 	a.F = *NewSetFrom(a)
+	a.Sigma = sigma
 	return a
 }
 
@@ -78,9 +79,9 @@ type AFN Automata
 // AFD automata
 type AFD Automata
 
-func SetList(qs []*Automata, count int) []*Automata {
+func SetList(qs []*Automata, count int, sigma []string) []*Automata {
 	for i := 0; i < count; i++ {
-		qs = append(qs, NewAutomata())
+		qs = append(qs, NewAutomata(sigma))
 	}
 	return qs
 }
@@ -140,7 +141,7 @@ func (first *Automata) AddBySide(second *Automata) *Automata {
 //SingleAFN
 func SingleAFN(sigma []string, va string) *Automata {
 	var qs []*Automata
-	qs = SetList(qs, 2)
+	qs = SetList(qs, 2, sigma)
 
 	q := NewSetFrom(qs...)
 	qo := NewSetFrom(qs[0])
@@ -150,7 +151,7 @@ func SingleAFN(sigma []string, va string) *Automata {
 	t := map[string][]*Automata{va: []*Automata{qs[1]}}
 	trans[qs[0]] = t
 
-	a := NewAutomata()
+	a := NewAutomata(sigma)
 	a.Q = *q
 	a.Sigma = sigma
 	a.Qo = *qo
@@ -161,9 +162,9 @@ func SingleAFN(sigma []string, va string) *Automata {
 
 //NewAFNKlean get Klean AFN
 func NewAFNKlean(sigma []string, aut *Automata) *Automata {
-	s := NewAutomata()
-	l := NewAutomata()
-	r := NewAutomata()
+	s := NewAutomata(sigma)
+	l := NewAutomata(sigma)
+	r := NewAutomata(sigma)
 
 	r = s.AddBySide(aut)
 	r = r.AddBySide(l)
@@ -196,16 +197,16 @@ func NewAFNKlean(sigma []string, aut *Automata) *Automata {
 
 //NewAFNConcat get Concat AFN
 func NewAFNConcat(sigma []string, first *Automata, second *Automata) *Automata {
-	r := NewAutomata()
+	r := NewAutomata(sigma)
 	r = first.AddBySide(second)
 	return r
 }
 
 //NewAFNKOr get Concat AFN
 func NewAFNKOr(sigma []string, a *Automata, b *Automata) *Automata {
-	r := NewAutomata()
-	s := NewAutomata()
-	f := NewAutomata()
+	r := NewAutomata(sigma)
+	s := NewAutomata(sigma)
+	f := NewAutomata(sigma)
 
 	r.Q = *NewSetFrom(s, f, a, b)
 	r.Qo = *NewSetFrom(s)
@@ -213,9 +214,9 @@ func NewAFNKOr(sigma []string, a *Automata, b *Automata) *Automata {
 	r.Sigma = sigma
 
 	// primeras dos trancisiones
-	tmp1 := NewAutomata()
+	tmp1 := NewAutomata(sigma)
 	tmp1 = s.AddBySide(a)
-	tmp2 := NewAutomata()
+	tmp2 := NewAutomata(sigma)
 	tmp2 = s.AddBySide(b)
 	r.Trans = MergeTrans(r.Trans, a.Trans)
 	r.Trans = MergeTrans(r.Trans, b.Trans)
@@ -267,4 +268,58 @@ func NewAFNQuestion(sigma []string, aut *Automata) *Automata {
 	f := SingleAFN(sigma, "")
 	r := NewAFNKOr(sigma, aut, f)
 	return r
+}
+
+func NewAFDfromAFN(aut *Automata) *Automata {
+	newAut := NewAutomata(aut.Sigma)
+	fmt.Printf("sigma: %v\n", aut.Sigma)
+	i := 0
+	mark := map[*Set]int{}
+	so := aut.Qo
+	newAut.Qo = so
+	D := aut.eclouser(&so, NewSet())
+	for t := range D.list {
+		fmt.Printf("\n")
+		T := NewSetFrom(t)
+		_, ok := mark[T]
+		if !ok {
+			mark[T] = i
+			i++
+		}
+
+		for _, a := range aut.Sigma {
+			next := aut.move(&t.Q, a)
+			if len(next.list) == 0 {
+				break
+			}
+			u := aut.eclouser(aut.move(&t.Q, a), NewSet())
+
+			U := NewAutomata(aut.Sigma)
+			U.Q = *u
+			U.Q.Add(U)
+
+			if !D.Has(U) {
+				f := Intersection(&U.Q, &aut.F)
+				if len(f.list) != 0 {
+					newAut.F.Add(U)
+				}
+				D.Add(U)
+			}
+
+			if newAut.Trans[t] == nil {
+				j := map[string][]*Automata{a: []*Automata{U}}
+				newAut.Trans[t] = j
+				newAut.Q.Add(U)
+			} else {
+				j := newAut.Trans[t]
+				j[a] = append(j[a], U)
+				newAut.Trans[t] = j
+				newAut.Q.Add(U)
+			}
+			fmt.Printf("marks: %v\n", mark)
+			fmt.Printf("aut: %v\n", newAut)
+		}
+	}
+	newAut.Q = *D
+	return newAut
 }

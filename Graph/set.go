@@ -1,5 +1,9 @@
 package Graph // TODO: change main
 
+import (
+	"fmt"
+)
+
 // Set is a struct that defines a set
 type Set struct {
 	list map[*Automata]bool
@@ -22,6 +26,7 @@ func NewSetFrom(I ...*Automata) *Set {
 
 // Has saids if i is in the set
 func (set *Set) Has(i *Automata) bool {
+	fmt.Printf("iii: %v\n", i)
 	_, ok := set.list[i]
 	return ok
 }
