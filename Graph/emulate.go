@@ -45,7 +45,3 @@ func (aut *Automata) Emulate(text string) *Set {
 	}
 	return Intersection(S, &aut.F)
 }
-
-func main() {
-
-}

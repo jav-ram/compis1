@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	gotree "github.com/disiqueira/gotree"
 	graph "github.com/ram16230/compis1/Graph"
 	tree "github.com/ram16230/compis1/Tree"
 )
@@ -329,6 +330,28 @@ func PrettyPrint(aut *graph.Automata) {
 	fmt.Printf("FFFFFF: %v\n", aut.F)
 }
 
+func getOtherNode(root *tree.Node) gotree.Tree {
+	node := gotree.New(root.GetValue().(string))
+
+	if root.Lchild != nil {
+		left := getOtherNode(root.Lchild)
+		node.AddTree(left)
+	}
+	if root.Rchild != nil {
+		right := getOtherNode(root.Rchild)
+		node.AddTree(right)
+	}
+
+	return node
+}
+
+func printTree(root *tree.Node) {
+	gtree := getOtherNode(root)
+	fmt.Printf("------------------------\n")
+	fmt.Println(gtree.Print())
+	fmt.Printf("------------------------\n")
+}
+
 func main() {
 	var ev Evaluator
 	ev.operators = []string{"*", "+", ".", "|", "?"}
@@ -336,6 +359,7 @@ func main() {
 	ev.agrupation = []string{"()"}
 	getList := ev.separator("(0|1)*.1")
 	node := ev.getTree(getList)
+	printTree(node)
 	fmt.Printf("nodesssssssss: %v\n", node)
 	afn := InOrder(node)
 
