@@ -3,8 +3,10 @@ package main // TODO: change main
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
+	gographvix "github.com/awalterschulze/gographviz"
 	gotree "github.com/disiqueira/gotree"
 	graph "github.com/ram16230/compis1/Graph"
 	tree "github.com/ram16230/compis1/Tree"
@@ -276,6 +278,10 @@ func PrettyPrint(aut *graph.Automata) {
 	}
 	value := aut.Trans
 
+	G := gographvix.NewGraph()
+	G.SetName("G")
+	G.SetDir(true)
+
 	tmp := map[*graph.Automata]int{}
 	qo := []int{}
 	qf := []int{}
@@ -285,43 +291,59 @@ func PrettyPrint(aut *graph.Automata) {
 		if !ok {
 			tmp[k] = i
 			if aut.Qo.Has(k) {
+				a := map[string]string{}
+				a["shape"] = "square"
+				G.AddNode("G", strconv.Itoa(i), a)
 				qo = append(qo, i)
-			}
-			if aut.F.Has(k) {
+			} else if aut.F.Has(k) {
+				a := map[string]string{}
+				a["shape"] = "doublecircle"
+				G.AddNode("G", strconv.Itoa(i), a)
 				qf = append(qf, i)
+			} else {
+				G.AddNode("G", strconv.Itoa(i), nil)
 			}
 			i++
 		}
 		for c, is := range value[k] {
 			if c == "" {
-				c = "''"
+				c = "ɛ"
 			}
 			for _, j := range is {
 				_, ok := tmp[j]
 				if !ok {
 					tmp[j] = i
 					if aut.Qo.Has(j) {
+						a := map[string]string{}
+						a["shape"] = "square"
+						G.AddNode("G", strconv.Itoa(i), a)
 						qo = append(qo, i)
-					}
-					if aut.F.Has(j) {
+					} else if aut.F.Has(j) {
+						a := map[string]string{}
+						a["shape"] = "doublecircle"
+						G.AddNode("G", strconv.Itoa(i), a)
 						qf = append(qf, i)
+					} else {
+						G.AddNode("G", strconv.Itoa(i), nil)
 					}
 					i++
 				}
+				a := map[string]string{}
+				a["label"] = c
+				G.AddEdge(strconv.Itoa(tmp[k]), strconv.Itoa(tmp[j]), true, a)
 				fmt.Printf("x: [%v][%s] => [%v]\n", tmp[k], c, tmp[j])
 				t := fmt.Sprintf("%v,%v,%v", tmp[k], c, tmp[j])
 				fmt.Fprintln(f, t)
 			}
 		}
 	}
-	fs, err := os.Create("python/important.txt")
+	fs, err := os.Create("python/graph.txt")
 	if err != nil {
 		fmt.Println(err)
 		fs.Close()
 		return
 	}
-	t := fmt.Sprintf("%v\n%v", qo, qf)
-	fmt.Fprintln(fs, t)
+	fmt.Fprintln(fs, G.String())
 	fmt.Printf("FFFFFF: %v\n", aut.F)
 }
 
@@ -352,7 +374,7 @@ func main() {
 	ev.operators = []string{"*", "+", ".", "|", "?"}
 	ev.alphabet = []string{"0", "1"}
 	ev.agrupation = []string{"()"}
-	getList := ev.separator("(0|1)*.1")
+	getList := ev.separator("(0.1)*")
 	node := ev.getTree(getList)
 	printTree(node)
 	afn := InOrder(node, []string{"0", "1"})
@@ -361,8 +383,11 @@ func main() {
 	PrettyPrint(a)
 	afd := graph.NewAFDfromAFN(a)
 	fmt.Printf("afd: %v\n", afd)
-	PrettyPrint(afd)
-	r := a.Emulate("0")
+	//PrettyPrint(afd)
+	r := a.Emulate("01")
+	fmt.Printf("%v\n", r)
+
+	r = afd.Emulate("01")
 	fmt.Printf("%v\n", r)
 
 }

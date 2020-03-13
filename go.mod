@@ -3,6 +3,7 @@ module github.com/ram16230/compis1
 go 1.13
 
 require (
+	github.com/awalterschulze/gographviz v0.0.0-20190522210029-fa59802746ab
 	github.com/cosiner/argv v0.0.1 // indirect
 	github.com/disiqueira/gotree v1.0.0
 	github.com/go-delve/delve v1.4.0 // indirect
