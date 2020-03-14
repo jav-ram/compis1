@@ -348,6 +348,7 @@ func PrettyPrint(aut *graph.Automata) {
 }
 
 func getOtherNode(root *tree.Node) gotree.Tree {
+
 	node := gotree.New(root.GetValue().(string))
 
 	if root.Lchild != nil {
@@ -376,6 +377,7 @@ func main() {
 	ev.agrupation = []string{"()"}
 	getList := ev.separator("(a|b)*.((a|(b.b))*.#")
 	node := ev.getTree(getList)
+	graph.IDTree(node, 0)
 	printTree(node)
 	afn := InOrder(node, []string{"a", "b", "#"})
 

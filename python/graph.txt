@@ -1,29 +1,29 @@
 digraph G {
 	0->1[ label=ɛ ];
-	2->3[ label=a ];
-	4->5[ label=ɛ ];
-	4->0[ label=ɛ ];
-	6->4[ label=ɛ ];
-	7->8[ label=a ];
-	9->10[ label=ɛ ];
-	9->6[ label=ɛ ];
-	5->2[ label=ɛ ];
-	5->11[ label=ɛ ];
-	11->12[ label=b ];
-	13->14[ label=b ];
-	15->16[ label=b ];
-	17->6[ label=ɛ ];
-	17->10[ label=ɛ ];
-	3->18[ label=ɛ ];
-	8->17[ label=ɛ ];
-	18->0[ label=ɛ ];
-	18->5[ label=ɛ ];
-	14->18[ label=ɛ ];
-	12->13[ label=ɛ ];
-	10->7[ label=ɛ ];
-	10->15[ label=ɛ ];
-	16->17[ label=ɛ ];
-	1->19[ label=# ];
+	2->3[ label=ɛ ];
+	2->4[ label=ɛ ];
+	5->6[ label=ɛ ];
+	3->7[ label=ɛ ];
+	3->8[ label=ɛ ];
+	9->2[ label=ɛ ];
+	1->9[ label=ɛ ];
+	1->10[ label=ɛ ];
+	7->11[ label=a ];
+	12->4[ label=ɛ ];
+	12->3[ label=ɛ ];
+	8->5[ label=b ];
+	11->12[ label=ɛ ];
+	10->13[ label=ɛ ];
+	10->14[ label=ɛ ];
+	13->15[ label=a ];
+	16->17[ label=# ];
+	4->16[ label=ɛ ];
+	6->18[ label=b ];
+	14->0[ label=b ];
+	15->1[ label=ɛ ];
+	19->10[ label=ɛ ];
+	19->9[ label=ɛ ];
+	18->12[ label=ɛ ];
 	0;
 	1;
 	10;
@@ -33,9 +33,9 @@ digraph G {
 	14;
 	15;
 	16;
-	17;
+	17 [ shape=doublecircle ];
 	18;
-	19 [ shape=doublecircle ];
+	19 [ shape=square ];
 	2;
 	3;
 	4;
@@ -43,7 +43,7 @@ digraph G {
 	6;
 	7;
 	8;
-	9 [ shape=square ];
+	9;
 
 }
 
