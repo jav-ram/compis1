@@ -372,12 +372,12 @@ func printTree(root *tree.Node) {
 func main() {
 	var ev Evaluator
 	ev.operators = []string{"*", "+", ".", "|", "?"}
-	ev.alphabet = []string{"0", "1"}
+	ev.alphabet = []string{"a", "b", "#"}
 	ev.agrupation = []string{"()"}
-	getList := ev.separator("(0.1)*")
+	getList := ev.separator("(a|b)*.((a|(b.b))*.#")
 	node := ev.getTree(getList)
 	printTree(node)
-	afn := InOrder(node, []string{"0", "1"})
+	afn := InOrder(node, []string{"a", "b", "#"})
 
 	a := afn.GetValue().(*graph.Automata)
 	PrettyPrint(a)
