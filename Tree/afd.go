@@ -6,7 +6,7 @@ func (node Node) IsNullable() bool {
 		return true
 	} else if v == "?" {
 		return true
-	} else if v == "" {
+	} else if v == "'" { //TODO: epsilon
 		return true
 	}
 	return false

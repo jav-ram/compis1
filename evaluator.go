@@ -306,7 +306,7 @@ func PrettyPrint(aut *graph.Automata) {
 			i++
 		}
 		for c, is := range value[k] {
-			if c == "" {
+			if c == "'" { //TODO: epsilon
 				c = "ɛ"
 			}
 			for _, j := range is {
@@ -349,7 +349,9 @@ func PrettyPrint(aut *graph.Automata) {
 
 func getOtherNode(root *tree.Node) gotree.Tree {
 
-	node := gotree.New(root.GetValue().(string))
+	t := fmt.Sprintf("%v", root.GetValue())
+
+	node := gotree.New(t)
 
 	if root.Lchild != nil {
 		left := getOtherNode(root.Lchild)
@@ -373,23 +375,29 @@ func printTree(root *tree.Node) {
 func main() {
 	var ev Evaluator
 	ev.operators = []string{"*", "+", ".", "|", "?"}
-	ev.alphabet = []string{"a", "b", "#"}
+	ev.alphabet = []string{"a", "b", "'"}
 	ev.agrupation = []string{"()"}
-	getList := ev.separator("(a|b)*.((a|(b.b))*.#")
+	getList := ev.separator("(a|b)*.a.b.b")
 	node := ev.getTree(getList)
-	graph.IDTree(node, 0)
+	n := *node
+	graph.IDTreeSet()(n)
 	printTree(node)
-	afn := InOrder(node, []string{"a", "b", "#"})
+	//afn := InOrder(node, []string{"a", "b"})
+	//a := afn.GetValue().(*graph.Automata)
+	afd := graph.NewAFD(n, []string{"a", "b"})
+	PrettyPrint(afd)
+	r := afd.Emulate("ababbb")
+	fmt.Printf("%v\n", r)
+	/* graph.IDTreeSet()(n)
+	fmt.Printf("afd: %v\n", afd.Q)
+	PrettyPrint(afd) */
+	//graph.FirstLastPos(node)
+	/* printTree(node)
 
-	a := afn.GetValue().(*graph.Automata)
-	PrettyPrint(a)
-	afd := graph.NewAFDfromAFN(a)
-	fmt.Printf("afd: %v\n", afd)
-	//PrettyPrint(afd)
-	r := a.Emulate("01")
+	PrettyPrint(a) */
+
+	/* r := a.Emulate("01")
 	fmt.Printf("%v\n", r)
 
-	r = afd.Emulate("01")
-	fmt.Printf("%v\n", r)
-
+	*/
 }
