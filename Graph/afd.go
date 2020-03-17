@@ -1,9 +1,7 @@
 package Graph
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"reflect"
 	"strconv"
 
@@ -290,21 +288,9 @@ func Intersect(A, B []string) []string {
 	return r
 }
 
-func unmark(D [][]string, marks [][]string) []string {
-	if len(marks) == 0 {
-		return D[0]
-	}
-	for _, s := range D {
-		if !contains(marks, s) {
-			return s
-		}
-	}
-	return nil
-}
-
-func contains(D [][]string, S []string) bool {
+func contains(D []*Automata, S *Automata) bool {
 	for _, d := range D {
-		if reflect.DeepEqual(d, S) {
+		if reflect.DeepEqual(d.ids, S.ids) {
 			return true
 		}
 	}
@@ -313,9 +299,6 @@ func contains(D [][]string, S []string) bool {
 
 func NewAFD(iroot tree.Node, sigma []string) *Automata {
 	newAut := NewAutomata(sigma)
-	newAut.Qo = *NewSet()
-	newAut.Q = *NewSet()
-	newAut.F = *NewSet()
 	// init add concat #
 	root := tree.NewOpNode(".")
 	finish := tree.NewLxNode("#")
@@ -326,34 +309,44 @@ func NewAFD(iroot tree.Node, sigma []string) *Automata {
 	fmt.Println("*****************************")
 	fmt.Printf("%v\n", fmap)
 	fmt.Println("*****************************")
-	D := [][]string{}
-	mark := [][]string{}
-
-	fmt.Printf("%v\n", fmap)
-
-	D = append(D, FirstPos(*root))
 
 	// set initial states
-	so := unmark(D, mark)
+	so := FirstPos(*root)
 	qo := NewAutomata(sigma)
 	qo.ids = so
-	newAut.Qo.Add(qo)
-	newAut.Q.Add(qo)
+	newAut.Qo = qo.Q
 
-	for unmark(D, mark) != nil { // while unmark exists on list
-		fmt.Printf("D: %v\nQ: %v\n", D, newAut.Q.list)
-		fmt.Printf("Trans: %v", newAut.Trans)
-		reader := bufio.NewReader(os.Stdin)
-		reader.ReadString('\n')
-		S := unmark(D, mark)
-		s := NewAutomata(sigma)
-		s.ids = S
-		mark = append(mark, S)
+	D := []*Automata{}
+	D = append(D, qo)
+
+	// set F
+	F := ""
+	for n, node := range nmaps {
+		switch c := node.GetValue().(type) {
+		case string:
+			{
+				if c == "#" {
+					F = n
+				}
+			}
+		case map[string][]string:
+			{
+				if c["v"][0] == "#" {
+					F = n
+				}
+			}
+		}
+	}
+
+	for UnMark(D) {
+		S := GetUnMark(D)
+		S.mark = true
 
 		for _, a := range sigma {
 			U := []string{}
+			u := NewAutomata(sigma)
 
-			for _, p := range S {
+			for _, p := range S.ids {
 				n := nmaps[p]
 				if n.GetValue() == "#" {
 					continue
@@ -367,53 +360,48 @@ func NewAFD(iroot tree.Node, sigma []string) *Automata {
 				}
 			}
 
-			if !contains(D, U) && len(U) != 0 {
-				D = append(D, U)
+			u.ids = U
+
+			if !contains(D, u) && len(U) != 0 {
+				D = append(D, u)
+				// is final state ?
+				for _, h := range u.ids {
+					if h == F {
+						newAut.F.Add(u)
+					}
+				}
 			}
 
 			tmp := NewAutomata(sigma)
 			tmp.ids = U
 
 			var eq *Automata
-			var u *Automata
-			fmt.Println("**********************")
-			for t := range newAut.Q.list {
-				fmt.Printf("IDS%v ", t.ids)
-			}
-			fmt.Println("")
-			fmt.Printf("%v\n", U)
-			for t := range newAut.Q.list {
+			for _, t := range D {
+				fmt.Printf("t %v u %v\n", t.ids, U)
 				if reflect.DeepEqual(t.ids, U) {
+					fmt.Println("Son iguales")
 					eq = t
 				}
 			}
 
 			if eq != nil {
 				u = eq
-				fmt.Printf("u: %v\n", u)
-			} else {
-				fmt.Println("no exists")
-				u = NewAutomata(sigma)
-				u.ids = U
-				u.Q.Adds(u)
-				fmt.Printf("u: %v\n", u)
 			}
-			fmt.Println("**********************")
 
 			// add transition from S to U with a
-			fmt.Printf("%v[%v]=> %v \n", s.ids, a, u.ids)
-			if newAut.Trans[s] == nil {
+			fmt.Printf("%v[%v]=> %v \n", S.ids, a, u.ids)
+			if newAut.Trans[S] == nil {
 				y := map[string][]*Automata{a: []*Automata{u}}
-				newAut.Trans[s] = y
+				newAut.Trans[S] = y
 			} else {
-				y := newAut.Trans[s]
+				y := newAut.Trans[S]
 				y[a] = append(y[a], u)
-				newAut.Trans[s] = y
+				newAut.Trans[S] = y
 			}
 
 		}
 
 	}
-	fmt.Printf("AAAAAAAAAAAAAAAAAAAAAa\n%v\n", newAut)
+	newAut.Q = *NewSetFrom(D...)
 	return newAut
 }
