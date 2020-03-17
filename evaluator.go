@@ -279,6 +279,7 @@ func PrettyPrint(aut *graph.Automata) {
 	value := aut.Trans
 
 	G := gographvix.NewGraph()
+	G.Attrs.Add("rankdir", "LR")
 	G.SetName("G")
 	G.SetDir(true)
 
