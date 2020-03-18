@@ -59,7 +59,7 @@ func main() {
 
 	// Simulate
 	t := "ab"
-	fmt.Printf("afn: %v\n", afd.Simulate(t))
-	fmt.Printf("afd: %v\n", afd.Simulate(t))
+	fmt.Printf("-afn: %v\n", afd.Simulate(t))
+	fmt.Printf("-afd: %v\n", afd.Simulate(t))
 	fmt.Printf("afdd: %v\n", afdd.Simulate(t))
 }
