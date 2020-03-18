@@ -306,7 +306,7 @@ func NewAFDfromAFN(aut *Automata) *Automata {
 	D = append(D, qo)
 
 	for UnMark(D) {
-		fmt.Printf("D: %v\n", UnMark(D))
+		// fmt.Printf("D: %v\n", UnMark(D))
 		T := GetUnMark(D)
 		T.mark = true
 

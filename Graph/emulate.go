@@ -37,11 +37,15 @@ func (aut *Automata) move(state *Set, t string) *Set {
 	return r
 }
 
-func (aut *Automata) Emulate(text string) *Set {
+func (aut *Automata) Simulate(text string) bool {
 	S := aut.eclouser(&aut.Qo, NewSet())
 	for _, c := range text {
 		m := aut.move(S, string(c))
 		S = aut.eclouser(m, NewSet())
 	}
-	return Intersection(S, &aut.F)
+	g := Intersection(S, &aut.F)
+	if len(g.list) > 0 {
+		return true
+	}
+	return false
 }

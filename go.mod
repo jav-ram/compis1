@@ -9,7 +9,7 @@ require (
 	github.com/go-delve/delve v1.4.0 // indirect
 	github.com/google/uuid v1.1.1 // indirect
 	github.com/jeremywohl/flatten v1.0.1
-	github.com/jinzhu/copier v0.0.0-20190924061706-b57f9002281a // indirect
+	github.com/jinzhu/copier v0.0.0-20190924061706-b57f9002281a
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/mattn/go-colorable v0.1.6 // indirect
 	github.com/mattn/go-runewidth v0.0.8 // indirect

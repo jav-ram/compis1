@@ -1,7 +1,6 @@
 package Graph
 
 import (
-	"fmt"
 	"reflect"
 	"strconv"
 
@@ -60,7 +59,9 @@ func IDTreeSet() func(tree.Node) (tree.Node, map[string]tree.Node) {
 
 		if root.Lchild != nil {
 			l := root.Lchild
-			if l.Lchild == nil && l.Rchild == nil {
+			if l.GetValue() == "'" {
+				l.SetValue("'")
+			} else if l.Lchild == nil && l.Rchild == nil {
 				i++
 				m := map[string][]string{}
 
@@ -87,7 +88,9 @@ func IDTreeSet() func(tree.Node) (tree.Node, map[string]tree.Node) {
 		}
 		if root.Rchild != nil {
 			r := root.Rchild
-			if r.Lchild == nil && r.Rchild == nil {
+			if r.GetValue() == "'" {
+				r.SetValue("'")
+			} else if r.Lchild == nil && r.Rchild == nil {
 				i++
 				m := map[string][]string{}
 
@@ -306,9 +309,6 @@ func NewAFD(iroot tree.Node, sigma []string) *Automata {
 	root.Rchild = finish
 	_, nmaps := IDTreeSet()(*root)
 	fmap := SetFollowPos(*root)
-	fmt.Println("*****************************")
-	fmt.Printf("%v\n", fmap)
-	fmt.Println("*****************************")
 
 	// set initial states
 	so := FirstPos(*root)
@@ -377,9 +377,9 @@ func NewAFD(iroot tree.Node, sigma []string) *Automata {
 
 			var eq *Automata
 			for _, t := range D {
-				fmt.Printf("t %v u %v\n", t.ids, U)
+				// fmt.Printf("t %v u %v\n", t.ids, U)
 				if reflect.DeepEqual(t.ids, U) {
-					fmt.Println("Son iguales")
+					//fmt.Println("Son iguales")
 					eq = t
 				}
 			}
@@ -389,7 +389,7 @@ func NewAFD(iroot tree.Node, sigma []string) *Automata {
 			}
 
 			// add transition from S to U with a
-			fmt.Printf("%v[%v]=> %v \n", S.ids, a, u.ids)
+			// fmt.Printf("%v[%v]=> %v \n", S.ids, a, u.ids)
 			if newAut.Trans[S] == nil {
 				y := map[string][]*Automata{a: []*Automata{u}}
 				newAut.Trans[S] = y

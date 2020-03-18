@@ -72,8 +72,7 @@ func (ev *Evaluator) IsAlphabet(lex string) bool {
 	return false
 }
 
-func (ev *Evaluator) separator(input string) (result []interface{}) {
-	tmp := ""
+func (ev *Evaluator) separator(input string) (result []interface{}, alphabet []string) {
 	group := 0
 	for i := 0; i < len(input); i++ {
 		if ev.IsOpeningAgrupation(input[i]) {
@@ -94,16 +93,21 @@ func (ev *Evaluator) separator(input string) (result []interface{}) {
 			}
 			// delete substring
 			i = j
-			result = append(result, ev.separator(t))
+			sep, a := ev.separator(t)
+			alphabet = append(alphabet, a...)
+			result = append(result, sep)
 		} else {
-			tmp += string(input[i])
-			if ev.IsOperator(tmp) || ev.IsAlphabet(tmp) {
-				result = append(result, tmp)
-				tmp = ""
+			c := string(input[i])
+			if ev.IsOperator(c) {
+				result = append(result, c)
+			} else {
+				result = append(result, c)
+				alphabet = append(alphabet, c)
 			}
 		}
 	}
-	return result
+	alphabet = append(alphabet, "'")
+	return result, unique(alphabet)
 }
 
 func GetAutomata(node *tree.Node) *tree.Node {
@@ -269,7 +273,19 @@ func InOrder(node *tree.Node, sigma []string) *tree.Node {
 	return node
 }
 
-func PrettyPrint(aut *graph.Automata) {
+func unique(strSlice []string) []string {
+	keys := make(map[string]bool)
+	list := []string{}
+	for _, entry := range strSlice {
+		if _, value := keys[entry]; !value {
+			keys[entry] = true
+			list = append(list, entry)
+		}
+	}
+	return list
+}
+
+func PrettyPrint(aut *graph.Automata, name string) {
 	f, err := os.Create("python/graph.txt")
 	if err != nil {
 		fmt.Println(err)
@@ -332,20 +348,20 @@ func PrettyPrint(aut *graph.Automata) {
 				a := map[string]string{}
 				a["label"] = c
 				G.AddEdge(strconv.Itoa(tmp[k]), strconv.Itoa(tmp[j]), true, a)
-				fmt.Printf("x: [%v][%s] => [%v]\n", tmp[k], c, tmp[j])
+				// fmt.Printf("x: [%v][%s] => [%v]\n", tmp[k], c, tmp[j])
 				t := fmt.Sprintf("%v,%v,%v", tmp[k], c, tmp[j])
 				fmt.Fprintln(f, t)
 			}
 		}
 	}
-	fs, err := os.Create("python/graph.txt")
+	fs, err := os.Create(fmt.Sprintf("graphs/%v.dot", name))
 	if err != nil {
 		fmt.Println(err)
 		fs.Close()
 		return
 	}
 	fmt.Fprintln(fs, G.String())
-	fmt.Printf("FFFFFF: %v\n", aut.F)
+	//fmt.Printf("FFFFFF: %v\n", aut.F)
 }
 
 func getOtherNode(root *tree.Node) gotree.Tree {
@@ -371,34 +387,4 @@ func printTree(root *tree.Node) {
 	fmt.Printf("------------------------\n")
 	fmt.Println(gtree.Print())
 	fmt.Printf("------------------------\n")
-}
-
-func main() {
-	var ev Evaluator
-	ev.operators = []string{"*", "+", ".", "|", "?"}
-	ev.alphabet = []string{"a", "b", "'"}
-	ev.agrupation = []string{"()"}
-	getList := ev.separator("(a|b)*.a.b.b")
-	node := ev.getTree(getList)
-	n := *node
-	graph.IDTreeSet()(n)
-	printTree(node)
-	//afn := InOrder(node, []string{"a", "b"})
-	//a := afn.GetValue().(*graph.Automata)
-	afd := graph.NewAFD(n, []string{"a", "b"})
-	PrettyPrint(afd)
-	r := afd.Emulate("ababbb")
-	fmt.Printf("%v\n", r)
-	/* graph.IDTreeSet()(n)
-	fmt.Printf("afd: %v\n", afd.Q)
-	PrettyPrint(afd) */
-	//graph.FirstLastPos(node)
-	/* printTree(node)
-
-	PrettyPrint(a) */
-
-	/* r := a.Emulate("01")
-	fmt.Printf("%v\n", r)
-
-	*/
 }
