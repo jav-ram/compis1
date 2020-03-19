@@ -17,13 +17,13 @@ func delete(slice []string, el string) (a []string) {
 	return a
 }
 
-func main() {
+func SimulateAll(t string, rg string) {
 	// Set Evaluator
 	var ev Evaluator
 	ev.operators = []string{"*", "+", ".", "|", "?"}
 	ev.agrupation = []string{"()"}
-	getList, alphabet := ev.separator("(a|b)*.a.b.b") // Get stack and alphabet
-	ev.alphabet = alphabet                            // set alphabet
+	getList, alphabet := ev.separator(rg) // Get stack and alphabet
+	ev.alphabet = alphabet                // set alphabet
 	fmt.Printf("GetList%v\n", getList)
 	// Build Tree
 	node := ev.getTree(getList)
@@ -33,33 +33,36 @@ func main() {
 	sigmaNotEpsilon := delete(ev.alphabet, "'")
 	fmt.Printf("Alphabet%v\n", alphabet)
 	fmt.Printf("sigmas %v\n", sigmaNotEpsilon)
-	afnTree := InOrder(node, []string{"a", "b"})
+	afnTree := InOrder(node, sigmaNotEpsilon)
 	afn := afnTree.GetValue().(*graph.Automata)
-	PrettyPrint(afn, "afn")
+	PrettyPrint(afn, "afn", rg)
 
 	//AFD
 	afd := graph.NewAFDfromAFN(afn)
-	PrettyPrint(afd, "afd")
+	PrettyPrint(afd, "afd", rg)
 
 	//AFDD
 	// Set Again Evaluator
 	ev = Evaluator{}
 	ev.operators = []string{"*", "+", ".", "|", "?"}
 	ev.agrupation = []string{"()"}
-	getList, alphabet = ev.separator("(a|b)*.a.b.b") // Get stack and alphabet
-	ev.alphabet = alphabet                           // set alphabet
+	getList, alphabet = ev.separator(rg) // Get stack and alphabet
+	ev.alphabet = alphabet               // set alphabet
 	fmt.Printf("GetList%v\n", getList)
 	// Build Tree Again
 	n := ev.getTree(getList)
 	printTree(n)
 	// AFDD
 	graph.IDTreeSet()(*n)
-	afdd := graph.NewAFD(*n, []string{"a", "b"})
-	PrettyPrint(afdd, "afdd")
+	afdd := graph.NewAFD(*n, sigmaNotEpsilon)
+	PrettyPrint(afdd, "afdd", rg)
 
 	// Simulate
-	t := "ab"
 	fmt.Printf("-afn: %v\n", afd.Simulate(t))
 	fmt.Printf("-afd: %v\n", afd.Simulate(t))
 	fmt.Printf("afdd: %v\n", afdd.Simulate(t))
+}
+
+func main() {
+	SimulateAll("babbbbb", "(b|b)*.a.b.b.(a|b)*")
 }

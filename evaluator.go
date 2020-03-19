@@ -285,7 +285,7 @@ func unique(strSlice []string) []string {
 	return list
 }
 
-func PrettyPrint(aut *graph.Automata, name string) {
+func PrettyPrint(aut *graph.Automata, dir string, name string) {
 	f, err := os.Create("python/graph.txt")
 	if err != nil {
 		fmt.Println(err)
@@ -354,7 +354,7 @@ func PrettyPrint(aut *graph.Automata, name string) {
 			}
 		}
 	}
-	fs, err := os.Create(fmt.Sprintf("graphs/%v.dot", name))
+	fs, err := os.Create(fmt.Sprintf("graphs/%v/%v.dot", dir, name))
 	if err != nil {
 		fmt.Println(err)
 		fs.Close()

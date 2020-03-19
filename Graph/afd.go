@@ -1,6 +1,7 @@
 package Graph
 
 import (
+	"fmt"
 	"reflect"
 	"strconv"
 
@@ -134,8 +135,8 @@ func FirstPos(root tree.Node) []string {
 				c1 := root.Lchild
 				c2 := root.Rchild
 				fs := []string{}
-				fs = append(fs, FirstPos(*c1)...)
-				fs = append(fs, FirstPos(*c2)...)
+				fs = unique(append(fs, FirstPos(*c1)...))
+				fs = unique(append(fs, FirstPos(*c2)...))
 				// Union c1 c2
 				return fs
 			} else if c == "." {
@@ -144,8 +145,8 @@ func FirstPos(root tree.Node) []string {
 					c1 := root.Lchild
 					c2 := root.Rchild
 					fs := []string{}
-					fs = append(fs, FirstPos(*c1)...)
-					fs = append(fs, FirstPos(*c2)...)
+					fs = unique(append(fs, FirstPos(*c1)...))
+					fs = unique(append(fs, FirstPos(*c2)...))
 					// Union c1 c2
 					return fs
 				}
@@ -166,6 +167,7 @@ func FirstPos(root tree.Node) []string {
 		}
 	}
 	// leaf
+	fmt.Printf("root: %v\n", root.GetValue())
 	m := root.GetValue().(map[string][]string)
 	return m["i"]
 }
@@ -184,8 +186,8 @@ func LastPos(root tree.Node) []string {
 				c1 := root.Lchild
 				c2 := root.Rchild
 				ls := []string{}
-				ls = append(ls, LastPos(*c1)...)
-				ls = append(ls, LastPos(*c2)...)
+				ls = unique(append(ls, LastPos(*c1)...))
+				ls = unique(append(ls, LastPos(*c2)...))
 				// Union c1 c2
 				return ls
 			} else if c == "." {
@@ -194,8 +196,8 @@ func LastPos(root tree.Node) []string {
 					c1 := root.Lchild
 					c2 := root.Rchild
 					ls := []string{}
-					ls = append(ls, LastPos(*c1)...)
-					ls = append(ls, LastPos(*c2)...)
+					ls = unique(append(ls, LastPos(*c1)...))
+					ls = unique(append(ls, LastPos(*c2)...))
 					// Union c1 c2
 					return ls
 				}
@@ -246,7 +248,7 @@ func SetFollowPos(root tree.Node) map[string][]string {
 			if !ok {
 				fmap[k] = v
 			} else {
-				fmap[k] = append(fmap[k], v...)
+				fmap[k] = unique(append(fmap[k], v...))
 			}
 		}
 	}
@@ -258,7 +260,7 @@ func SetFollowPos(root tree.Node) map[string][]string {
 			if !ok {
 				fmap[k] = v
 			} else {
-				fmap[k] = append(fmap[k], v...)
+				fmap[k] = unique(append(fmap[k], v...))
 			}
 		}
 	}
@@ -268,11 +270,11 @@ func SetFollowPos(root tree.Node) map[string][]string {
 		c2 := *root.Rchild
 
 		for _, i := range LastPos(c1) {
-			fmap[i] = append(fmap[i], FirstPos(c2)...)
+			fmap[i] = unique(append(fmap[i], FirstPos(c2)...))
 		}
 	} else if v == "*" {
 		for _, i := range LastPos(root) {
-			fmap[i] = append(fmap[i], FirstPos(root)...)
+			fmap[i] = unique(append(fmap[i], FirstPos(root)...))
 		}
 	}
 
@@ -284,7 +286,7 @@ func Intersect(A, B []string) []string {
 	for _, a := range A {
 		for _, b := range B {
 			if a == b {
-				r = append(r, a)
+				r = unique(append(r, a))
 			}
 		}
 	}
@@ -298,6 +300,18 @@ func contains(D []*Automata, S *Automata) bool {
 		}
 	}
 	return false
+}
+
+func unique(strSlice []string) []string {
+	keys := make(map[string]bool)
+	list := []string{}
+	for _, entry := range strSlice {
+		if _, value := keys[entry]; !value {
+			keys[entry] = true
+			list = append(list, entry)
+		}
+	}
+	return list
 }
 
 func NewAFD(iroot tree.Node, sigma []string) *Automata {
@@ -322,6 +336,7 @@ func NewAFD(iroot tree.Node, sigma []string) *Automata {
 	// set F
 	F := ""
 	for n, node := range nmaps {
+		fmt.Println("A")
 		switch c := node.GetValue().(type) {
 		case string:
 			{
@@ -335,6 +350,13 @@ func NewAFD(iroot tree.Node, sigma []string) *Automata {
 					F = n
 				}
 			}
+		}
+	}
+
+	// is final state ?
+	for _, h := range qo.ids {
+		if h == F {
+			newAut.F.Add(qo)
 		}
 	}
 
@@ -355,7 +377,7 @@ func NewAFD(iroot tree.Node, sigma []string) *Automata {
 
 				for _, v := range nv["v"] {
 					if v == a {
-						U = append(U, fmap[p]...)
+						U = unique(append(U, fmap[p]...))
 					}
 				}
 			}
