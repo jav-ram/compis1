@@ -7,7 +7,7 @@ digraph G {
 	2->4[ label=b ];
 	2->5[ label=a ];
 	0 [ shape=square ];
-	1;
+	1 [ shape=doublecircle ];
 	2 [ shape=doublecircle ];
 	3;
 	4;

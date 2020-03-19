@@ -26,12 +26,18 @@ func Nullable(root *tree.Node) bool {
 			} else if c == "*" {
 				// klean
 				return true
+			} else if c == "'" {
+				return true
 			}
 		}
-	default:
+	case map[string][]string:
 		{
 			// leaf
+			if c["v"][0] == "'" {
+				return true
+			}
 			return false
+
 		}
 	}
 	return false

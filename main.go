@@ -53,7 +53,6 @@ func SimulateAll(t string, rg string) {
 	fmt.Printf("GetList%v\n", getList)
 	// Build Tree Again
 	n := ev.getTree(getList)
-	printTree(n)
 	// AFDD
 	graph.IDTreeSet()(*n)
 	afdd := graph.NewAFD(*n, sigmaNotEpsilon)
@@ -95,5 +94,5 @@ func main() {
 		SimulateAll(goods[i], regexs[i])
 	}
 
-	//SimulateAll("ab", "b*.a.b")
+	//SimulateAll("11", "(('|0).1*)*")
 }
