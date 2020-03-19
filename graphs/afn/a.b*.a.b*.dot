@@ -1,0 +1,32 @@
+digraph G {
+	rankdir=LR;
+	0->1[ label=b ];
+	2->3[ label=ɛ ];
+	4->0[ label=ɛ ];
+	4->5[ label=ɛ ];
+	6->7[ label=a ];
+	8->9[ label=b ];
+	10->8[ label=ɛ ];
+	10->2[ label=ɛ ];
+	9->2[ label=ɛ ];
+	9->8[ label=ɛ ];
+	1->5[ label=ɛ ];
+	1->0[ label=ɛ ];
+	11->4[ label=ɛ ];
+	7->10[ label=ɛ ];
+	3->11[ label=a ];
+	0;
+	1;
+	10;
+	11;
+	2;
+	3;
+	4;
+	5 [ shape=doublecircle ];
+	6 [ shape=square ];
+	7;
+	8;
+	9;
+
+}
+

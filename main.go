@@ -38,6 +38,8 @@ func SimulateAll(t string, rg string) {
 	PrettyPrint(afn, "afn", rg)
 
 	//AFD
+	fmt.Printf("afn sigma%v\n", afn.Sigma)
+	afn.Sigma = sigmaNotEpsilon
 	afd := graph.NewAFDfromAFN(afn)
 	PrettyPrint(afd, "afd", rg)
 
@@ -64,5 +66,34 @@ func SimulateAll(t string, rg string) {
 }
 
 func main() {
-	SimulateAll("babbbbb", "(b|b)*.a.b.b.(a|b)*")
+	regexs := []string{
+		"(a*|b*).c",
+		"(b|b)*.a.b.b.(a|b)*",
+		"(a|')*.b.(a.a*).c",
+		"(a|b)*.a.(a|b).(a|b)",
+		"b*.a.(b|')",
+		"a.(b)*.a.(b)*",
+		"(('|0).1*)*",
+		"(0|1)*.0.(0|1).(0|1)",
+		"(0.0)*.(1.1)*",
+		"(0|1).1*.(0|1)",
+	}
+	goods := []string{
+		"aaaaaaaaaaaaaaac",
+		"babba",
+		"baac",
+		"bbbbaab",
+		"a",
+		"abbbbbbbab",
+		"011011",
+		"1111111001",
+		"000011",
+		"011111",
+	}
+
+	for i := range regexs {
+		SimulateAll(goods[i], regexs[i])
+	}
+
+	//SimulateAll("ab", "b*.a.b")
 }

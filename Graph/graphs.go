@@ -322,7 +322,7 @@ func NewAFDfromAFN(aut *Automata) *Automata {
 				}
 			}
 
-			if count == 0 {
+			if count == 0 { // does not contains D
 				D = append(D, u)
 
 				if newAut.Trans[T] == nil {
@@ -334,7 +334,7 @@ func NewAFDfromAFN(aut *Automata) *Automata {
 					newAut.Trans[T] = y
 				}
 
-			} else {
+			} else { // contains D
 				for _, p := range D {
 					if reflect.DeepEqual(p.Q.list, u.Q.list) {
 						if newAut.Trans[T] == nil {

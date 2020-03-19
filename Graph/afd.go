@@ -336,7 +336,6 @@ func NewAFD(iroot tree.Node, sigma []string) *Automata {
 	// set F
 	F := ""
 	for n, node := range nmaps {
-		fmt.Println("A")
 		switch c := node.GetValue().(type) {
 		case string:
 			{
