@@ -399,36 +399,33 @@ func NewAFD(iroot tree.Node, sigma []string) *Automata {
 				}
 			}
 
-			tmp := NewAutomata(sigma)
-			tmp.ids = U
-
-			var eq *Automata
 			for _, t := range D {
 				// fmt.Printf("t %v u %v\n", t.ids, U)
-				if reflect.DeepEqual(t.ids, U) {
+				if reflect.DeepEqual(t.ids, u.ids) {
 					//fmt.Println("Son iguales")
-					eq = t
+					u = t
+					break
 				}
 			}
 
-			if eq != nil {
-				u = eq
-			}
-
 			// add transition from S to U with a
-			// fmt.Printf("%v[%v]=> %v \n", S.ids, a, u.ids)
-			if newAut.Trans[S] == nil {
-				y := map[string][]*Automata{a: []*Automata{u}}
-				newAut.Trans[S] = y
-			} else {
-				y := newAut.Trans[S]
-				y[a] = append(y[a], u)
-				newAut.Trans[S] = y
+			fmt.Printf("%v[%v]=> %v \n", S.ids, a, u.ids)
+			if len(u.ids) != 0 {
+				if newAut.Trans[S] == nil {
+					y := map[string][]*Automata{a: []*Automata{u}}
+					newAut.Trans[S] = y
+				} else {
+					y := newAut.Trans[S]
+					y[a] = append(y[a], u)
+					newAut.Trans[S] = y
+				}
 			}
+			fmt.Printf("T %v\n", newAut.Trans)
 
 		}
 
 	}
 	newAut.Q = *NewSetFrom(D...)
+	fmt.Printf("%v\n", newAut.Trans)
 	return newAut
 }

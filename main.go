@@ -27,21 +27,21 @@ func SimulateAll(t string, rg string) {
 	fmt.Printf("GetList%v\n", getList)
 	// Build Tree
 	node := ev.getTree(getList)
-	printTree(node)
+	//printTree(node)
 
 	//AFN
 	sigmaNotEpsilon := delete(ev.alphabet, "'")
 	fmt.Printf("Alphabet%v\n", alphabet)
-	fmt.Printf("sigmas %v\n", sigmaNotEpsilon)
+	// fmt.Printf("sigmas %v\n", sigmaNotEpsilon)
 	afnTree := InOrder(node, sigmaNotEpsilon)
 	afn := afnTree.GetValue().(*graph.Automata)
-	PrettyPrint(afn, "afn", rg)
+	// PrettyPrint(afn, "afn", rg)
 
 	//AFD
 	fmt.Printf("afn sigma%v\n", afn.Sigma)
 	afn.Sigma = sigmaNotEpsilon
 	afd := graph.NewAFDfromAFN(afn)
-	PrettyPrint(afd, "afd", rg)
+	//PrettyPrint(afd, "afd", rg)
 
 	//AFDD
 	// Set Again Evaluator
@@ -59,13 +59,14 @@ func SimulateAll(t string, rg string) {
 	PrettyPrint(afdd, "afdd", rg)
 
 	// Simulate
+	fmt.Printf("%v => %v\n", t, rg)
 	fmt.Printf("-afn: %v\n", afd.Simulate(t))
 	fmt.Printf("-afd: %v\n", afd.Simulate(t))
 	fmt.Printf("afdd: %v\n", afdd.Simulate(t))
 }
 
 func main() {
-	regexs := []string{
+	/* regexs := []string{
 		"(a*|b*).c",
 		"(b|b)*.a.b.b.(a|b)*",
 		"(a|')*.b.(a.a*).c",
@@ -92,7 +93,7 @@ func main() {
 
 	for i := range regexs {
 		SimulateAll(goods[i], regexs[i])
-	}
+	} */
 
-	//SimulateAll("11", "(('|0).1*)*")
+	SimulateAll("abb", "(b|b)*.a.b.b.(a|')*")
 }
