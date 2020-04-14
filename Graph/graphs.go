@@ -232,7 +232,7 @@ func NewAFNKOr(sigma []string, a *Automata, b *Automata) *Automata {
 	t["'"] = append(t["'"], tmp2.Trans[s]["'"]...)  //TODO: epsilon
 	r.Trans[s] = t
 
-	// segundas trancisión
+	// segundas trancisiónadd
 	for kf := range a.F.list {
 		for ko := range f.Qo.list {
 			if r.Trans[kf] == nil {

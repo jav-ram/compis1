@@ -5,8 +5,10 @@ import (
 
 	evaluator "github.com/ram16230/compis1/Evaluator"
 	graph "github.com/ram16230/compis1/Graph"
+	scanner "github.com/ram16230/compis1/Scanner"
 )
 
+// TODO: move to utils
 func delete(slice []string, el string) (a []string) {
 	i := -1
 	for j, s := range slice {
@@ -68,4 +70,15 @@ func SimulateAll(t string, rg string) {
 
 func main() {
 	SimulateAll("abb", "(b|b)*.a.b.b.(a|')*")
+	rgs := []string{
+		/* "a.b*.a",
+		"b.a*.b", */
+		"a",
+		"b",
+	}
+	names := []string{
+		"Bs",
+		"As",
+	}
+	scanner.MakeAFNS(rgs, names)
 }
