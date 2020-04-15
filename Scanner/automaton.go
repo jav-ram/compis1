@@ -10,7 +10,7 @@ import (
 type ScannerAF struct {
 	automaton *graph.Automata
 	name      string
-	F         map[*graph.Automata]bool
+	F         graph.Set
 	sigma     []string
 }
 
@@ -52,7 +52,7 @@ func MakeAFN(
 	scannerAFN := &ScannerAF{
 		afn,
 		name,
-		afn.Qo.GetList(),
+		afn.Qo,
 		ev.Alphabet,
 	}
 	return scannerAFN
@@ -145,4 +145,72 @@ func MakeAFNS(
 	evaluator.PrettyPrint(&result.automaton, "afdd", "ohyea")
 
 	return result
+}
+
+func contains(tabSuccessStates map[*graph.Automata][]string, set *graph.Set) []string {
+	for _, s := range set.GetItems() {
+		if tabSuccessStates[s] != nil {
+			return tabSuccessStates[s]
+		}
+	}
+	return nil
+}
+
+func (scanner *ScannerAFCombined) Simulate(text string) {
+	aut := &scanner.automaton
+	successStates := scanner.F
+
+	// init
+	S := aut.Eclouser(&aut.Qo, graph.NewSet()) // current state
+	var lexeme string                          // lexeme
+	dollar := graph.NewAutomata([]string{})    // $
+	dollar.ToggleMark()                        // set as $
+	stack := []*graph.Automata{dollar}         // FIXME: get global "$"
+	tokens := []string{}
+
+	// read
+	i := -1
+	c := text[0]
+
+	// Main Scanner
+	for len(text) > 0 {
+		fmt.Printf("Outer for %v\n", S)
+		for len(S.GetItems()) > 0 { // While State is not a state of error
+			i++
+			c = text[i]
+			stack = append(stack, S.GetItems()...)
+			// move
+			m := aut.Move(S, string(c))
+			S = aut.Eclouser(m, graph.NewSet())
+			fmt.Printf("FFFFFF %v %v\n", text, i)
+			fmt.Printf("G %v %v\n", text, i)
+			lexeme += string(text[i])
+			g := contains(successStates, S)
+			if g != nil {
+				fmt.Println("Is sucess")
+				// if S is a goal state
+				stack = []*graph.Automata{} // clear
+				lex := text[:i+1]           // truncate
+				text = text[i+1:]
+				tokens = append(tokens, fmt.Sprintf("<%v, %v>", g, lex))
+				i = -1
+				S = aut.Eclouser(&aut.Qo, graph.NewSet())
+				if len(text) == 0 {
+					break
+				}
+			}
+			fmt.Printf("tokens %v \n", tokens)
+		}
+		// Roll back Loop TODO: make it work
+		for contains(successStates, S) == nil && len(stack) > 0 {
+			x := &graph.Automata{}
+			fmt.Printf("stack %v \n", len(stack))
+			x, stack = stack[len(stack)-1], stack[:len(stack)-1] // pop
+			S = graph.NewSetFrom(x)
+			lexeme = lexeme[:len(lexeme)-1] // delete last char
+		}
+	}
+
+	fmt.Printf("tokens: \n%v\n", tokens)
+
 }

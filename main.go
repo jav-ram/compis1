@@ -71,14 +71,12 @@ func SimulateAll(t string, rg string) {
 func main() {
 	SimulateAll("abb", "(b|b)*.a.b.b.(a|')*")
 	rgs := []string{
-		/* "a.b*.a",
-		"b.a*.b", */
-		"a",
-		"b",
+		"a.b*.a",
+		"b.a*.b",
 	}
 	names := []string{
-		"Bs",
-		"As",
+		"A",
+		"B",
 	}
-	scanner.MakeAFNS(rgs, names)
+	scanner.MakeAFNS(rgs, names).Simulate("abbbbbaaabaaaab")
 }

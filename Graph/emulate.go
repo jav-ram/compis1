@@ -1,6 +1,6 @@
 package Graph
 
-func (aut *Automata) eclouser(state *Set, visited *Set) *Set {
+func (aut *Automata) Eclouser(state *Set, visited *Set) *Set {
 	r := NewSet()
 
 	for k := range state.list {
@@ -15,7 +15,7 @@ func (aut *Automata) eclouser(state *Set, visited *Set) *Set {
 					}
 				}
 				s := NewSetFrom(b...)
-				r = Union(r, aut.eclouser(s, visited))
+				r = Union(r, aut.Eclouser(s, visited))
 			}
 		}
 	}
@@ -23,7 +23,7 @@ func (aut *Automata) eclouser(state *Set, visited *Set) *Set {
 	return r
 }
 
-func (aut *Automata) move(state *Set, t string) *Set {
+func (aut *Automata) Move(state *Set, t string) *Set {
 	r := NewSet()
 
 	for k := range state.list {
@@ -38,10 +38,10 @@ func (aut *Automata) move(state *Set, t string) *Set {
 }
 
 func (aut *Automata) Simulate(text string) bool {
-	S := aut.eclouser(&aut.Qo, NewSet())
+	S := aut.Eclouser(&aut.Qo, NewSet())
 	for _, c := range text {
-		m := aut.move(S, string(c))
-		S = aut.eclouser(m, NewSet())
+		m := aut.Move(S, string(c))
+		S = aut.Eclouser(m, NewSet())
 	}
 	g := Intersection(S, &aut.F)
 	if len(g.list) > 0 {

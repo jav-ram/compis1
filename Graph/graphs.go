@@ -20,6 +20,10 @@ type Automata struct {
 // State automata
 type State Automata
 
+func (aut *Automata) ToggleMark() {
+	aut.mark = !aut.mark
+}
+
 func PrintAutomata(trans string) {
 	f, err := os.Create("python/graph.txt")
 	if err != nil {
@@ -298,7 +302,7 @@ func GetUnMark(D []*Automata) *Automata {
 
 func NewAFDfromAFN(aut *Automata) *Automata {
 	newAut := NewAutomata(aut.Sigma)
-	so := aut.eclouser(&aut.Qo, NewSet())
+	so := aut.Eclouser(&aut.Qo, NewSet())
 	qo := NewAutomata(aut.Sigma)
 	qo.Q = *Union(&qo.Q, so)
 	newAut.Qo = qo.Q
@@ -311,7 +315,7 @@ func NewAFDfromAFN(aut *Automata) *Automata {
 		T.mark = true
 
 		for _, a := range aut.Sigma {
-			U := aut.eclouser(aut.move(&T.Q, a), NewSet())
+			U := aut.Eclouser(aut.Move(&T.Q, a), NewSet())
 			u := NewAutomata(aut.Sigma)
 			u.Q = *U
 
