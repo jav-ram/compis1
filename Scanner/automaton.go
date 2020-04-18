@@ -62,10 +62,6 @@ func MakeAFN(
 func AddInParrallel(auts ...*ScannerAF) *ScannerAFCombined {
 	start := graph.NewAutomata(auts[0].sigma)
 	r := &ScannerAFCombined{}
-
-	fmt.Printf("finals of start %v\n", start.F.GetList())
-	fmt.Printf("iniciales de As %v\n", auts[0].automaton.Qo.GetList())
-	fmt.Printf("iniciales de Bs %v\n", auts[1].automaton.Qo.GetList())
 	// Make All conections from start to new automaton
 	for _, aut := range auts {
 		start.Q.Adds(aut.automaton.Q.GetItems()...)
@@ -163,9 +159,9 @@ func (scanner *ScannerAFCombined) Simulate(text string) {
 	// init
 	S := aut.Eclouser(&aut.Qo, graph.NewSet()) // current state
 	var lexeme string                          // lexeme
-	dollar := graph.NewAutomata([]string{})    // $
-	dollar.ToggleMark()                        // set as $
-	stack := []*graph.Automata{dollar}         // FIXME: get global "$"
+	stack := []*graph.Set{}                    // Stack of acceptence states
+	rememberIndex := []int{}                   // Stack of where in text was the acceptence state
+	rememberToken := []string{}                //Stack of the lexeme of the acceptance state
 	tokens := []string{}
 
 	// read
@@ -174,40 +170,80 @@ func (scanner *ScannerAFCombined) Simulate(text string) {
 
 	// Main Scanner
 	for len(text) > 0 {
-		fmt.Printf("Outer for %v\n", S)
-		for len(S.GetItems()) > 0 { // While State is not a state of error
-			i++
-			c = text[i]
-			stack = append(stack, S.GetItems()...)
-			// move
-			m := aut.Move(S, string(c))
-			S = aut.Eclouser(m, graph.NewSet())
-			fmt.Printf("FFFFFF %v %v\n", text, i)
-			fmt.Printf("G %v %v\n", text, i)
-			lexeme += string(text[i])
-			g := contains(successStates, S)
-			if g != nil {
-				fmt.Println("Is sucess")
-				// if S is a goal state
-				stack = []*graph.Automata{} // clear
-				lex := text[:i+1]           // truncate
-				text = text[i+1:]
-				tokens = append(tokens, fmt.Sprintf("<%v, %v>", g, lex))
-				i = -1
-				S = aut.Eclouser(&aut.Qo, graph.NewSet())
-				if len(text) == 0 {
-					break
+		// while there is text
+		for {
+			if len(S.GetItems()) > 0 {
+				// if State is not a state error
+				i++
+				c = text[i]
+				// ----- move -----
+				m := aut.Move(S, string(c))
+				S = aut.Eclouser(m, graph.NewSet())
+				// ----------------
+				lexeme += string(text[i])
+				g := contains(successStates, S)
+				if g != nil {
+					// if S is a goal state
+
+					// look if next char causes an error
+					thereIsMore := false
+					if len(text) > i+1 {
+						m := aut.Move(S, string(text[i+1]))    // make a tmp next move FIXME: check if text has i + 1 elements
+						tmp := aut.Eclouser(m, graph.NewSet()) // next state
+						if len(tmp.GetItems()) > 0 {
+							thereIsMore = true
+						}
+					}
+					if thereIsMore {
+						// it has more possible moves
+						stack = append(stack, S)                      // stack state of acceptance
+						rememberIndex = append(rememberIndex, i)      // stack index position of text for state of acceptance
+						rememberToken = append(rememberToken, lexeme) // stack lexeme for the state of acceptance
+					} else {
+						// it does not have more possible moves
+						// ----- We accept this as a token -----
+						lex := text[:i+1]                                        // truncate lex of token
+						text = text[i+1:]                                        // get rest of text
+						tokens = append(tokens, fmt.Sprintf("<%v, %v>", g, lex)) // Add to token list
+						i = -1                                                   // reset index of text
+						S = aut.Eclouser(&aut.Qo, graph.NewSet())                // reset automaton
+						if len(text) == 0 {
+							// if there is no more break
+							break
+						}
+						// ------------------------------------
+					}
+
+				}
+				/* fmt.Printf("S %v \n", S)
+				fmt.Printf("tokens %v \n", tokens) */
+			} else {
+				// if there is an error
+				if len(stack) > 0 {
+					// there is a state in stack
+					S = stack[len(stack)-1]                      // pop last state of acceptance
+					stack = []*graph.Set{}                       // reset stack
+					i = rememberIndex[len(rememberIndex)-1]      // pop last index of acceptance
+					rememberIndex = []int{}                      // reset index
+					token := rememberToken[len(rememberToken)-1] // pop last index of acceptance
+					rememberToken = []string{}                   // reset lexeme
+					// make token
+					// ----- We accept this as a token -----
+					lex := text[:i+1]                                            // truncate lex of token
+					text = text[i+1:]                                            // get rest of text
+					tokens = append(tokens, fmt.Sprintf("<%v, %v>", token, lex)) // Add to token list
+					i = -1                                                       // reset index of text
+					S = aut.Eclouser(&aut.Qo, graph.NewSet())                    // reset automaton
+					if len(text) == 0 {
+						// if there is no more break
+						break
+					}
+					// ------------------------------------
+				} else {
+					// syntax error
+					return
 				}
 			}
-			fmt.Printf("tokens %v \n", tokens)
-		}
-		// Roll back Loop TODO: make it work
-		for contains(successStates, S) == nil && len(stack) > 0 {
-			x := &graph.Automata{}
-			fmt.Printf("stack %v \n", len(stack))
-			x, stack = stack[len(stack)-1], stack[:len(stack)-1] // pop
-			S = graph.NewSetFrom(x)
-			lexeme = lexeme[:len(lexeme)-1] // delete last char
 		}
 	}
 
