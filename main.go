@@ -68,19 +68,54 @@ func SimulateAll(t string, rg string) {
 	fmt.Printf("afdd: %v\n", afdd.Simulate(t))
 }
 
+func MakeLetter() string {
+	set := ""
+	for i := 65; i <= 90; i++ {
+		set += string(rune(i)) + "|"
+	}
+	for i := 97; i < 122; i++ {
+		set += string(rune(i)) + "|"
+	}
+	set += string(rune(122))
+	return "(" + set + ")"
+}
+
+func MakeDigit() string {
+	set := ""
+	for i := 0; i < 9; i++ {
+		set += fmt.Sprintf("%v", i) + "|"
+	}
+	set += fmt.Sprintf("%v", 9)
+	return "(" + set + ")"
+}
+
 func main() {
-	SimulateAll("abb", "(b|b)*.a.b.b.(a|')*")
+	letter := MakeLetter()
+	digit := MakeDigit()
+
+	// SimulateAll("abb", "(b|b)*.a.b.b.(a|')*")
 	rgs := []string{
-		"c.o.n.s.t",
-		"c.o",
-		"n",
-		"s.t",
+		fmt.Sprintf("(%v).(%v|%v)*", letter, letter, digit), // ident -> letter.(letter|digit)*
+		fmt.Sprintf("(%v).(%v)*", digit, digit),             // number -> digit.(digit)*
+		"=",                                                 // equal -> =
+		//".",    // finish -> .
+		/* "(|)",                                               // group -> (|)
+		"[|]",                                               // option -> [|]
+		"{|}",                                               // iteration -> {|} */
 	}
 	names := []string{
-		"const",
-		"co",
-		"n",
-		"st",
+		"ident",
+		"number",
+		"equal",
+		"finish",
+		"group",
+		"option",
+		"iteration",
 	}
-	scanner.MakeAFNS(rgs, names).Simulate("const")
+	/* ev := evaluator.Evaluator{}
+	ev.Operators = []string{"*", "+", "|", "?"}
+	ev.Agrupation = []string{"()"}
+	getList, _ := ev.Separator(rgs[2]) // Get stack and alphabet
+	fmt.Printf("List %v\n", getList) */
+	scanner.MakeAFNS(rgs, names).Simulate("abs123=123")
 }
