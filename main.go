@@ -3,9 +3,12 @@ package main
 import (
 	"fmt"
 
+	evaluator "github.com/ram16230/compis1/Evaluator"
 	graph "github.com/ram16230/compis1/Graph"
+	scanner "github.com/ram16230/compis1/Scanner"
 )
 
+// TODO: move to utils
 func delete(slice []string, el string) (a []string) {
 	i := -1
 	for j, s := range slice {
@@ -19,21 +22,21 @@ func delete(slice []string, el string) (a []string) {
 
 func SimulateAll(t string, rg string) {
 	// Set Evaluator
-	var ev Evaluator
-	ev.operators = []string{"*", "+", ".", "|", "?"}
-	ev.agrupation = []string{"()"}
-	getList, alphabet := ev.separator(rg) // Get stack and alphabet
-	ev.alphabet = alphabet                // set alphabet
+	var ev evaluator.Evaluator
+	ev.Operators = []string{"*", "+", ".", "|", "?"}
+	ev.Agrupation = []string{"()"}
+	getList, alphabet := ev.Separator(rg) // Get stack and alphabet
+	ev.Alphabet = alphabet                // set alphabet
 	fmt.Printf("GetList%v\n", getList)
 	// Build Tree
-	node := ev.getTree(getList)
+	node := ev.GetTree(getList)
 	//printTree(node)
 
 	//AFN
-	sigmaNotEpsilon := delete(ev.alphabet, "'")
+	sigmaNotEpsilon := delete(ev.Alphabet, "'")
 	fmt.Printf("Alphabet%v\n", alphabet)
 	// fmt.Printf("sigmas %v\n", sigmaNotEpsilon)
-	afnTree := InOrder(node, sigmaNotEpsilon)
+	afnTree := evaluator.InOrder(node, sigmaNotEpsilon)
 	afn := afnTree.GetValue().(*graph.Automata)
 	// PrettyPrint(afn, "afn", rg)
 
@@ -45,18 +48,18 @@ func SimulateAll(t string, rg string) {
 
 	//AFDD
 	// Set Again Evaluator
-	ev = Evaluator{}
-	ev.operators = []string{"*", "+", ".", "|", "?"}
-	ev.agrupation = []string{"()"}
-	getList, alphabet = ev.separator(rg) // Get stack and alphabet
-	ev.alphabet = alphabet               // set alphabet
+	ev = evaluator.Evaluator{}
+	ev.Operators = []string{"*", "+", ".", "|", "?"}
+	ev.Agrupation = []string{"()"}
+	getList, alphabet = ev.Separator(rg) // Get stack and alphabet
+	ev.Alphabet = alphabet               // set alphabet
 	fmt.Printf("GetList%v\n", getList)
 	// Build Tree Again
-	n := ev.getTree(getList)
+	n := ev.GetTree(getList)
 	// AFDD
 	graph.IDTreeSet()(*n)
 	afdd := graph.NewAFD(*n, sigmaNotEpsilon)
-	PrettyPrint(afdd, "afdd", rg)
+	evaluator.PrettyPrint(afdd, "afdd", rg)
 
 	// Simulate
 	fmt.Printf("%v => %v\n", t, rg)
@@ -65,35 +68,54 @@ func SimulateAll(t string, rg string) {
 	fmt.Printf("afdd: %v\n", afdd.Simulate(t))
 }
 
+func MakeLetter() string {
+	set := ""
+	for i := 65; i <= 90; i++ {
+		set += string(rune(i)) + "|"
+	}
+	for i := 97; i < 122; i++ {
+		set += string(rune(i)) + "|"
+	}
+	set += string(rune(122))
+	return "(" + set + ")"
+}
+
+func MakeDigit() string {
+	set := ""
+	for i := 0; i < 9; i++ {
+		set += fmt.Sprintf("%v", i) + "|"
+	}
+	set += fmt.Sprintf("%v", 9)
+	return "(" + set + ")"
+}
+
 func main() {
-	/* regexs := []string{
-		"(a*|b*).c",
-		"(b|b)*.a.b.b.(a|b)*",
-		"(a|')*.b.(a.a*).c",
-		"(a|b)*.a.(a|b).(a|b)",
-		"b*.a.(b|')",
-		"a.(b)*.a.(b)*",
-		"(('|0).1*)*",
-		"(0|1)*.0.(0|1).(0|1)",
-		"(0.0)*.(1.1)*",
-		"(0|1).1*.(0|1)",
-	}
-	goods := []string{
-		"aaaaaaaaaaaaaaac",
-		"babba",
-		"baac",
-		"bbbbaab",
-		"a",
-		"abbbbbbbab",
-		"011011",
-		"1111111001",
-		"000011",
-		"011111",
-	}
+	letter := MakeLetter()
+	digit := MakeDigit()
 
-	for i := range regexs {
-		SimulateAll(goods[i], regexs[i])
-	} */
-
-	SimulateAll("abb", "(b|b)*.a.b.b.(a|')*")
+	// SimulateAll("abb", "(b|b)*.a.b.b.(a|')*")
+	rgs := []string{
+		fmt.Sprintf("(%v).(%v|%v)*", letter, letter, digit), // ident -> letter.(letter|digit)*
+		fmt.Sprintf("(%v).(%v)*", digit, digit),             // number -> digit.(digit)*
+		"=",                                                 // equal -> =
+		//".",    // finish -> .
+		/* "(|)",                                               // group -> (|)
+		"[|]",                                               // option -> [|]
+		"{|}",                                               // iteration -> {|} */
+	}
+	names := []string{
+		"ident",
+		"number",
+		"equal",
+		"finish",
+		"group",
+		"option",
+		"iteration",
+	}
+	/* ev := evaluator.Evaluator{}
+	ev.Operators = []string{"*", "+", "|", "?"}
+	ev.Agrupation = []string{"()"}
+	getList, _ := ev.Separator(rgs[2]) // Get stack and alphabet
+	fmt.Printf("List %v\n", getList) */
+	scanner.MakeAFNS(rgs, names).Simulate("abs123=123")
 }

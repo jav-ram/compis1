@@ -12,6 +12,20 @@ func NewSet() *Set {
 	return s
 }
 
+func (set *Set) GetItems() []*Automata {
+	items := []*Automata{}
+	for k := range set.list {
+		items = append(items, k)
+	}
+	return items
+}
+
+// GetList returns list of set
+func (set *Set) GetList() map[*Automata]bool {
+	return set.list
+}
+
+// NewSetFrom Make a set from list of automatas
 func NewSetFrom(I ...*Automata) *Set {
 	s := NewSet()
 	for _, i := range I {

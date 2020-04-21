@@ -3,8 +3,8 @@ digraph G {
 	0->1[ label=b ];
 	1->2[ label=b ];
 	2->2[ label=a ];
-	3->3[ label=b ];
 	3->0[ label=a ];
+	3->3[ label=b ];
 	0;
 	1;
 	2 [ shape=doublecircle ];

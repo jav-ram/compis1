@@ -1,4 +1,4 @@
-package main // TODO: change main
+package Evaluator // TODO: change main
 
 import (
 	"fmt"
@@ -13,9 +13,9 @@ import (
 )
 
 type Evaluator struct {
-	alphabet   []string
-	operators  []string
-	agrupation []string
+	Alphabet   []string
+	Operators  []string
+	Agrupation []string
 }
 
 type Token struct {
@@ -34,7 +34,7 @@ func (ev *Evaluator) IsOpeningAgrupation(l byte) bool {
 
 // IsClosingAgrupation gets if is an opening
 func (ev *Evaluator) IsClosingAgrupation(l byte) bool {
-	for _, op := range ev.agrupation {
+	for _, op := range ev.Agrupation {
 		if l == op[1] {
 			return true
 		}
@@ -42,9 +42,9 @@ func (ev *Evaluator) IsClosingAgrupation(l byte) bool {
 	return false
 }
 
-// IsAgrupation tells if the lex contains a agrupation
+// IsAgrupation tells if the lex contains a Agrupation
 func (ev *Evaluator) IsAgrupation(lex string) bool {
-	for _, op := range ev.agrupation {
+	for _, op := range ev.Agrupation {
 		if strings.Contains(lex, string(op[0])) {
 			return true
 		}
@@ -54,7 +54,7 @@ func (ev *Evaluator) IsAgrupation(lex string) bool {
 
 // IsOperator tells if the lex is a operator or not
 func (ev *Evaluator) IsOperator(lex string) bool {
-	for _, op := range ev.operators {
+	for _, op := range ev.Operators {
 		if op == lex {
 			return true
 		}
@@ -64,7 +64,7 @@ func (ev *Evaluator) IsOperator(lex string) bool {
 
 // IsAlphabet tells if the lex is a operator or not
 func (ev *Evaluator) IsAlphabet(lex string) bool {
-	for _, w := range ev.alphabet {
+	for _, w := range ev.Alphabet {
 		if w == lex {
 			return true
 		}
@@ -72,7 +72,7 @@ func (ev *Evaluator) IsAlphabet(lex string) bool {
 	return false
 }
 
-func (ev *Evaluator) separator(input string) (result []interface{}, alphabet []string) {
+func (ev *Evaluator) Separator(input string) (result []interface{}, Alphabet []string) {
 	group := 0
 	for i := 0; i < len(input); i++ {
 		if ev.IsOpeningAgrupation(input[i]) {
@@ -93,8 +93,8 @@ func (ev *Evaluator) separator(input string) (result []interface{}, alphabet []s
 			}
 			// delete substring
 			i = j
-			sep, a := ev.separator(t)
-			alphabet = append(alphabet, a...)
+			sep, a := ev.Separator(t)
+			Alphabet = append(Alphabet, a...)
 			result = append(result, sep)
 		} else {
 			c := string(input[i])
@@ -102,12 +102,12 @@ func (ev *Evaluator) separator(input string) (result []interface{}, alphabet []s
 				result = append(result, c)
 			} else {
 				result = append(result, c)
-				alphabet = append(alphabet, c)
+				Alphabet = append(Alphabet, c)
 			}
 		}
 	}
-	alphabet = append(alphabet, "'")
-	return result, unique(alphabet)
+	Alphabet = append(Alphabet, "'")
+	return result, unique(Alphabet)
 }
 
 func GetAutomata(node *tree.Node) *tree.Node {
@@ -135,14 +135,14 @@ func search(list []interface{}, s interface{}) int {
 	return -1
 }
 
-func (ev *Evaluator) getTree(input []interface{}) *tree.Node {
+func (ev *Evaluator) GetTree(input []interface{}) *tree.Node {
 
 	for i := 0; i < len(input); i++ {
 		switch input[i].(type) {
 		case []interface{}:
 			{
 				v := input[i].([]interface{})
-				input[i] = ev.getTree(v)
+				input[i] = ev.GetTree(v)
 			}
 		case *tree.Node:
 			{
@@ -156,7 +156,7 @@ func (ev *Evaluator) getTree(input []interface{}) *tree.Node {
 					for search(input, "*") > 0 {
 						n := tree.NewOpNode("*")
 						idx := search(input, "*")
-						l := ev.getTree([]interface{}{input[idx-1]})
+						l := ev.GetTree([]interface{}{input[idx-1]})
 						l.SetParent(n)
 						n.AddLeftChild(l)
 						input[idx-1] = n
@@ -166,7 +166,7 @@ func (ev *Evaluator) getTree(input []interface{}) *tree.Node {
 					for search(input, "+") > 0 {
 						n := tree.NewOpNode("+")
 						idx := search(input, "+")
-						l := ev.getTree([]interface{}{input[idx-1]})
+						l := ev.GetTree([]interface{}{input[idx-1]})
 						l.SetParent(n)
 						n.AddLeftChild(l)
 						input[idx-1] = n
@@ -176,7 +176,7 @@ func (ev *Evaluator) getTree(input []interface{}) *tree.Node {
 					for search(input, "?") > 0 {
 						n := tree.NewOpNode("?")
 						idx := search(input, "?")
-						l := ev.getTree([]interface{}{input[idx-1]})
+						l := ev.GetTree([]interface{}{input[idx-1]})
 						l.SetParent(n)
 						n.AddLeftChild(l)
 						input[idx-1] = n
@@ -186,9 +186,9 @@ func (ev *Evaluator) getTree(input []interface{}) *tree.Node {
 					for search(input, ".") > 0 {
 						n := tree.NewOpNode(".")
 						idx := search(input, ".")
-						l := ev.getTree([]interface{}{input[idx-1]})
+						l := ev.GetTree([]interface{}{input[idx-1]})
 						l.SetParent(n)
-						r := ev.getTree([]interface{}{input[idx+1]})
+						r := ev.GetTree([]interface{}{input[idx+1]})
 						r.SetParent(n)
 						n.AddChilds(l, r)
 						input[idx-1] = n
@@ -199,9 +199,9 @@ func (ev *Evaluator) getTree(input []interface{}) *tree.Node {
 					for search(input, "|") > 0 {
 						n := tree.NewOpNode(c)
 						idx := search(input, "|")
-						l := ev.getTree([]interface{}{input[idx-1]})
+						l := ev.GetTree([]interface{}{input[idx-1]})
 						l.SetParent(n)
-						r := ev.getTree([]interface{}{input[idx+1]})
+						r := ev.GetTree([]interface{}{input[idx+1]})
 						r.SetParent(n)
 						n.AddChilds(l, r)
 						input[idx-1] = n
