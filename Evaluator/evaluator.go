@@ -18,11 +18,6 @@ type Evaluator struct {
 	Agrupation []string
 }
 
-type Token struct {
-	name  string
-	value string
-}
-
 func remove(s []interface{}, i int) []interface{} {
 	return append(s[:i], s[i+1:]...)
 }

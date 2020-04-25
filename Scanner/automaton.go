@@ -5,6 +5,7 @@ import (
 
 	evaluator "github.com/ram16230/compis1/Evaluator"
 	graph "github.com/ram16230/compis1/Graph"
+	token "github.com/ram16230/compis1/Token"
 )
 
 type ScannerAF struct {
@@ -31,14 +32,11 @@ func delete(slice []string, el string) (a []string) {
 	return a
 }
 
-func MakeAFN(
-	rg string,
-	name string,
-) *ScannerAF {
+func MakeAFN(tkn token.TokenDescriptor) *ScannerAF {
 	ev := evaluator.Evaluator{}
 	ev.Operators = []string{"*", "+", "|", "?"}
 	ev.Agrupation = []string{"()"}
-	getList, alphabet := ev.Separator(rg) // Get stack and alphabet
+	getList, alphabet := ev.Separator(tkn.Rgx) // Get stack and alphabet
 	fmt.Printf("list: %v \n %v\n", getList, alphabet)
 	ev.Alphabet = alphabet // set alphabet
 	node := ev.GetTree(getList)
@@ -52,7 +50,7 @@ func MakeAFN(
 	// Return new Automaton
 	scannerAFN := &ScannerAF{
 		afn,
-		name,
+		tkn.ID,
 		afn.Qo,
 		ev.Alphabet,
 	}
@@ -129,13 +127,11 @@ func AddInParrallel(auts ...*ScannerAF) *ScannerAFCombined {
 	return r
 }
 
-func MakeAFNS(
-	rgs []string,
-	names []string,
-) *ScannerAFCombined {
+// MakeAFNS make an afn
+func MakeAFNS(tkns []token.TokenDescriptor) *ScannerAFCombined {
 	scannerAFs := []*ScannerAF{}
-	for i := range rgs {
-		scannerAFs = append(scannerAFs, MakeAFN(rgs[i], names[i]))
+	for i := range tkns {
+		scannerAFs = append(scannerAFs, MakeAFN(tkns[i]))
 	}
 
 	result := AddInParrallel(scannerAFs...)
@@ -163,7 +159,7 @@ func (scanner *ScannerAFCombined) Simulate(text string) {
 	stack := []*graph.Set{}                    // Stack of acceptence states
 	rememberIndex := []int{}                   // Stack of where in text was the acceptence state
 	rememberToken := []string{}                //Stack of the lexeme of the acceptance state
-	tokens := []string{}
+	tokens := []token.Token{}
 
 	// read
 	i := -1
@@ -203,11 +199,11 @@ func (scanner *ScannerAFCombined) Simulate(text string) {
 					} else {
 						// it does not have more possible moves
 						// ----- We accept this as a token -----
-						lex := text[:i+1]                                        // truncate lex of token
-						text = text[i+1:]                                        // get rest of text
-						tokens = append(tokens, fmt.Sprintf("<%v, %v>", g, lex)) // Add to token list
-						i = -1                                                   // reset index of text
-						S = aut.Eclouser(&aut.Qo, graph.NewSet())                // reset automaton
+						lex := text[:i+1]                                  // truncate lex of token
+						text = text[i+1:]                                  // get rest of text
+						tokens = append(tokens, token.NewToken(g[0], lex)) // Add to token list
+						i = -1                                             // reset index of text
+						S = aut.Eclouser(&aut.Qo, graph.NewSet())          // reset automaton
 						if len(text) == 0 {
 							// if there is no more break
 							break
@@ -222,19 +218,19 @@ func (scanner *ScannerAFCombined) Simulate(text string) {
 				// if there is an error
 				if len(stack) > 0 {
 					// there is a state in stack
-					S = stack[len(stack)-1]                      // pop last state of acceptance
-					stack = []*graph.Set{}                       // reset stack
-					i = rememberIndex[len(rememberIndex)-1]      // pop last index of acceptance
-					rememberIndex = []int{}                      // reset index
-					token := rememberToken[len(rememberToken)-1] // pop last index of acceptance
-					rememberToken = []string{}                   // reset lexeme
+					S = stack[len(stack)-1]                         // pop last state of acceptance
+					stack = []*graph.Set{}                          // reset stack
+					i = rememberIndex[len(rememberIndex)-1]         // pop last index of acceptance
+					rememberIndex = []int{}                         // reset index
+					newToken := rememberToken[len(rememberToken)-1] // pop last index of acceptance
+					rememberToken = []string{}                      // reset lexeme
 					// make token
 					// ----- We accept this as a token -----
-					lex := text[:i+1]                                            // truncate lex of token
-					text = text[i+1:]                                            // get rest of text
-					tokens = append(tokens, fmt.Sprintf("<%v, %v>", token, lex)) // Add to token list
-					i = -1                                                       // reset index of text
-					S = aut.Eclouser(&aut.Qo, graph.NewSet())                    // reset automaton
+					lex := text[:i+1]                                      // truncate lex of token
+					text = text[i+1:]                                      // get rest of text
+					tokens = append(tokens, token.NewToken(newToken, lex)) // Add to token list
+					i = -1                                                 // reset index of text
+					S = aut.Eclouser(&aut.Qo, graph.NewSet())              // reset automaton
 					if len(text) == 0 {
 						// if there is no more break
 						break

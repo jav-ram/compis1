@@ -6,6 +6,7 @@ import (
 	evaluator "github.com/ram16230/compis1/Evaluator"
 	graph "github.com/ram16230/compis1/Graph"
 	scanner "github.com/ram16230/compis1/Scanner"
+	token "github.com/ram16230/compis1/Token"
 )
 
 // TODO: move to utils
@@ -93,55 +94,18 @@ func main() {
 	letter := MakeLetter()
 	digit := MakeDigit()
 
-	// SimulateAll("abb", "(b|b)*.a.b.b.(a|')*")
-	rgs := []string{
-		fmt.Sprintf("%v(%v|%v)*", letter, letter, digit), // ident -> letter.(letter|digit)*
-		fmt.Sprintf("(%v)(%v*)", digit, digit),           // number -> digit.(digit)*
-		"=",                                              // equal -> =
-		".",                                              // finish -> .
-		fmt.Sprintf("\\%v", "("),                         // group -> (
-		fmt.Sprintf("\\%v", ")"),                         // group -> (
-		fmt.Sprintf("\\%v", "["),                         // group -> [
-		fmt.Sprintf("\\%v", "]"),                         // group -> ]
-		fmt.Sprintf("\\%v", "{"),                         // group -> {
-		fmt.Sprintf("\\%v", "}"),                         // group -> }
-	}
-	names := []string{
-		"ident",
-		"number",
-		"equal",
-		"finish",
-		"group start",
-		"group end",
-		"option start",
-		"option end",
-		"iteration start",
-		"iteration end",
-	}
-	/* ev := evaluator.Evaluator{}
-	ev.Operators = []string{"*", "+", "|", "?"}
-	ev.Agrupation = []string{"()"}
-	getList, _ := ev.Separator(rgs[2]) // Get stack and alphabet
-	fmt.Printf("List %v\n", getList) */
-	scanner.MakeAFNS(rgs, names).Simulate("(abs123=123.")
-	/* ev := evaluator.Evaluator{}
-	ev.Operators = []string{"*", "+", "|", "?"}
-	ev.Agrupation = []string{"()"}
-	getList, alphabet := ev.Separator(rgs[2]) // Get stack and alphabet
-	fmt.Printf("list: %v \n%v\n", getList, alphabet)
-	ev.Alphabet = alphabet // set alphabet
-	node := ev.GetTree(getList)
+	var tkns []token.TokenDescriptor
+	tkns = append(tkns, token.NewTokenDescriptor("ident", fmt.Sprintf("%v(%v|%v)*", letter, letter, digit))) // ident -> letter.(letter|digit)*
+	tkns = append(tkns, token.NewTokenDescriptor("number", fmt.Sprintf("(%v)(%v*)", digit, digit)))          // number -> digit.(digit)*
+	tkns = append(tkns, token.NewTokenDescriptor("equal", "="))                                              // equal -> =
+	tkns = append(tkns, token.NewTokenDescriptor("finish", "."))                                             // finish -> .
+	tkns = append(tkns, token.NewTokenDescriptor("group_start", fmt.Sprintf("\\%v", "(")))                   // group_start -> (
+	tkns = append(tkns, token.NewTokenDescriptor("group_end", fmt.Sprintf("\\%v", ")")))                     // group_end -> (
+	tkns = append(tkns, token.NewTokenDescriptor("option_start", fmt.Sprintf("\\%v", "[")))                  // option_start -> [
+	tkns = append(tkns, token.NewTokenDescriptor("option_end", fmt.Sprintf("\\%v", "]")))                    // option_end -> ]
+	tkns = append(tkns, token.NewTokenDescriptor("iteration_start", fmt.Sprintf("\\%v", "{")))               // iteration_start -> {
+	tkns = append(tkns, token.NewTokenDescriptor("iteration_end", fmt.Sprintf("\\%v", "}")))                 // iteration_edn -> }
 
-	evaluator.PrintTree(node)
-
-	// AFN
-	sigmaNotEpsilon := delete(ev.Alphabet, "'")
-	// fmt.Printf("sigmas %v\n", sigmaNotEpsilon)
-	afnTree := evaluator.InOrder(node, sigmaNotEpsilon)
-	afn := afnTree.GetValue().(*graph.Automata)
-
-	evaluator.PrettyPrint(afn, "afn", "oyea")
-
-	fmt.Printf("%v\n", afn) */
+	scanner.MakeAFNS(tkns).Simulate("(abs123=123.")
 
 }
