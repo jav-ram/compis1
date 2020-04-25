@@ -74,8 +74,32 @@ func (ev *Evaluator) IsAlphabet(lex string) bool {
 
 func (ev *Evaluator) Separator(input string) (result []interface{}, Alphabet []string) {
 	group := 0
+	lastWasLex := false
+	tmp := ""
 	for i := 0; i < len(input); i++ {
+		if string(input[i]) == string(rune(92)) {
+			// if read scape character
+			// read next character as a lex
+			i++
+			c := string(input[i]) // next char
+			lastWasLex = true
+			tmp += c
+			if i == len(input)-1 {
+				result = append(result, tmp)
+				Alphabet = append(Alphabet, strings.Split(tmp, "")...)
+				lastWasLex = false
+				tmp = ""
+			}
+			continue
+		}
+
 		if ev.IsOpeningAgrupation(input[i]) {
+			if lastWasLex {
+				result = append(result, tmp)
+				Alphabet = append(Alphabet, strings.Split(tmp, "")...)
+				lastWasLex = false
+				tmp = ""
+			}
 			group++
 			j := i + 1
 			t := ""
@@ -99,10 +123,22 @@ func (ev *Evaluator) Separator(input string) (result []interface{}, Alphabet []s
 		} else {
 			c := string(input[i])
 			if ev.IsOperator(c) {
+				if lastWasLex {
+					result = append(result, tmp)
+					Alphabet = append(Alphabet, strings.Split(tmp, "")...)
+					lastWasLex = false
+					tmp = ""
+				}
 				result = append(result, c)
 			} else {
-				result = append(result, c)
-				Alphabet = append(Alphabet, c)
+				lastWasLex = true
+				tmp += c
+				if i == len(input)-1 {
+					result = append(result, tmp)
+					Alphabet = append(Alphabet, strings.Split(tmp, "")...)
+					lastWasLex = false
+					tmp = ""
+				}
 			}
 		}
 	}
@@ -110,7 +146,7 @@ func (ev *Evaluator) Separator(input string) (result []interface{}, Alphabet []s
 	return result, unique(Alphabet)
 }
 
-func GetAutomata(node *tree.Node) *tree.Node {
+func GetAutomata(node *tree.Node, sigma []string) *tree.Node {
 	switch node.GetValue().(type) {
 	case graph.Automata:
 		{
@@ -119,8 +155,14 @@ func GetAutomata(node *tree.Node) *tree.Node {
 	default:
 		{
 			value := fmt.Sprintf("%v", node.GetValue())
-			single := graph.SingleAFN(nil, value)
-			node.SetValue(single)
+
+			newNode := graph.SingleAFN(sigma, string(value[0]))
+			for i := 1; i < len(value); i++ {
+				next := graph.SingleAFN(sigma, string(value[i]))
+				newNode = graph.NewAFNConcat(sigma, newNode, next)
+			}
+
+			node.SetValue(newNode)
 			return node
 		}
 	}
@@ -136,7 +178,6 @@ func search(list []interface{}, s interface{}) int {
 }
 
 func (ev *Evaluator) GetTree(input []interface{}) *tree.Node {
-
 	for i := 0; i < len(input); i++ {
 		switch input[i].(type) {
 		case []interface{}:
@@ -215,6 +256,21 @@ func (ev *Evaluator) GetTree(input []interface{}) *tree.Node {
 			}
 		}
 	}
+
+	// WATCH:
+	if len(input) > 1 {
+		for i := 1; i < len(input); i++ {
+			n := tree.NewOpNode(".")
+			l := ev.GetTree([]interface{}{input[0]})
+			l.SetParent(n)
+			r := ev.GetTree([]interface{}{input[i]})
+			r.SetParent(n)
+			n.AddChilds(l, r)
+			input[0] = n
+			input = remove(input, i)
+		}
+	}
+
 	return input[0].(*tree.Node)
 }
 
@@ -268,8 +324,9 @@ func InOrder(node *tree.Node, sigma []string) *tree.Node {
 			}
 		}
 	} else {
-		return GetAutomata(node)
+		return GetAutomata(node, sigma)
 	}
+
 	return node
 }
 
@@ -382,7 +439,7 @@ func getOtherNode(root *tree.Node) gotree.Tree {
 	return node
 }
 
-func printTree(root *tree.Node) {
+func PrintTree(root *tree.Node) {
 	gtree := getOtherNode(root)
 	fmt.Printf("------------------------\n")
 	fmt.Println(gtree.Print())

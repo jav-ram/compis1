@@ -95,27 +95,53 @@ func main() {
 
 	// SimulateAll("abb", "(b|b)*.a.b.b.(a|')*")
 	rgs := []string{
-		fmt.Sprintf("(%v).(%v|%v)*", letter, letter, digit), // ident -> letter.(letter|digit)*
-		fmt.Sprintf("(%v).(%v)*", digit, digit),             // number -> digit.(digit)*
-		"=",                                                 // equal -> =
-		//".",    // finish -> .
-		/* "(|)",                                               // group -> (|)
-		"[|]",                                               // option -> [|]
-		"{|}",                                               // iteration -> {|} */
+		fmt.Sprintf("%v(%v|%v)*", letter, letter, digit), // ident -> letter.(letter|digit)*
+		fmt.Sprintf("(%v)(%v*)", digit, digit),           // number -> digit.(digit)*
+		"=",                                              // equal -> =
+		".",                                              // finish -> .
+		fmt.Sprintf("\\%v", "("),                         // group -> (
+		fmt.Sprintf("\\%v", ")"),                         // group -> (
+		fmt.Sprintf("\\%v", "["),                         // group -> [
+		fmt.Sprintf("\\%v", "]"),                         // group -> ]
+		fmt.Sprintf("\\%v", "{"),                         // group -> {
+		fmt.Sprintf("\\%v", "}"),                         // group -> }
 	}
 	names := []string{
 		"ident",
 		"number",
 		"equal",
 		"finish",
-		"group",
-		"option",
-		"iteration",
+		"group start",
+		"group end",
+		"option start",
+		"option end",
+		"iteration start",
+		"iteration end",
 	}
 	/* ev := evaluator.Evaluator{}
 	ev.Operators = []string{"*", "+", "|", "?"}
 	ev.Agrupation = []string{"()"}
 	getList, _ := ev.Separator(rgs[2]) // Get stack and alphabet
 	fmt.Printf("List %v\n", getList) */
-	scanner.MakeAFNS(rgs, names).Simulate("abs123=123")
+	scanner.MakeAFNS(rgs, names).Simulate("(abs123=123.")
+	/* ev := evaluator.Evaluator{}
+	ev.Operators = []string{"*", "+", "|", "?"}
+	ev.Agrupation = []string{"()"}
+	getList, alphabet := ev.Separator(rgs[2]) // Get stack and alphabet
+	fmt.Printf("list: %v \n%v\n", getList, alphabet)
+	ev.Alphabet = alphabet // set alphabet
+	node := ev.GetTree(getList)
+
+	evaluator.PrintTree(node)
+
+	// AFN
+	sigmaNotEpsilon := delete(ev.Alphabet, "'")
+	// fmt.Printf("sigmas %v\n", sigmaNotEpsilon)
+	afnTree := evaluator.InOrder(node, sigmaNotEpsilon)
+	afn := afnTree.GetValue().(*graph.Automata)
+
+	evaluator.PrettyPrint(afn, "afn", "oyea")
+
+	fmt.Printf("%v\n", afn) */
+
 }

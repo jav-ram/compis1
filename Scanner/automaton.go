@@ -36,10 +36,11 @@ func MakeAFN(
 	name string,
 ) *ScannerAF {
 	ev := evaluator.Evaluator{}
-	ev.Operators = []string{"*", "+", ".", "|", "?"}
+	ev.Operators = []string{"*", "+", "|", "?"}
 	ev.Agrupation = []string{"()"}
 	getList, alphabet := ev.Separator(rg) // Get stack and alphabet
-	ev.Alphabet = alphabet                // set alphabet
+	fmt.Printf("list: %v \n %v\n", getList, alphabet)
+	ev.Alphabet = alphabet // set alphabet
 	node := ev.GetTree(getList)
 
 	// AFN
