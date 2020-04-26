@@ -46,12 +46,13 @@ func MakeAFN(tkn token.TokenDescriptor) *ScannerAF {
 	// fmt.Printf("sigmas %v\n", sigmaNotEpsilon)
 	afnTree := evaluator.InOrder(node, sigmaNotEpsilon)
 	afn := afnTree.GetValue().(*graph.Automata)
+	afd := graph.NewAFDfromAFN(afn)
 
 	// Return new Automaton
 	scannerAFN := &ScannerAF{
-		afn,
+		afd,
 		tkn.ID,
-		afn.Qo,
+		afd.F,
 		ev.Alphabet,
 	}
 	return scannerAFN
