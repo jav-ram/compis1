@@ -198,6 +198,9 @@ func (scanner *ScannerAFCombined) Simulate(text string) {
 						rememberToken = append(rememberToken, lexeme) // stack lexeme for the state of acceptance
 					} else {
 						// it does not have more possible moves
+						stack = []*graph.Set{}     // reset stack
+						rememberIndex = []int{}    // reset index
+						rememberToken = []string{} // reset lexeme
 						// ----- We accept this as a token -----
 						lex := text[:i+1]                                  // truncate lex of token
 						text = text[i+1:]                                  // get rest of text
@@ -238,7 +241,18 @@ func (scanner *ScannerAFCombined) Simulate(text string) {
 					// ------------------------------------
 				} else {
 					// syntax error
-					return
+					stack = []*graph.Set{}     // reset stack
+					rememberIndex = []int{}    // reset index
+					rememberToken = []string{} // reset lexeme
+					// ----- We accept this as a token -----
+					text = text[i+1:]                         // get rest of text
+					i = -1                                    // reset index of text
+					S = aut.Eclouser(&aut.Qo, graph.NewSet()) // reset automaton
+					if len(text) == 0 {
+						// if there is no more break
+						break
+					}
+					// ------------------------------------
 				}
 			}
 		}
