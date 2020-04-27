@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 
 	evaluator "github.com/ram16230/compis1/Evaluator"
 	graph "github.com/ram16230/compis1/Graph"
@@ -114,6 +115,8 @@ func main() {
 	tkns = append(tkns, token.NewTokenDescriptor("iteration_start", "{"))                                    // iteration_start -> {
 	tkns = append(tkns, token.NewTokenDescriptor("iteration_end", "}"))                                      // iteration_edn -> }
 
-	scanner.MakeAFNS(tkns).Simulate("COMPILER KEYWORDS asdasd (a=123) {}.")
+	scan := scanner.MakeAFNS(tkns)
+	data, _ := ioutil.ReadFile("./test/Aritmetica.ATG")
+	scan.Simulate(string(data))
 
 }
