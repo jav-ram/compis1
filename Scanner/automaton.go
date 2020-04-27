@@ -12,12 +12,14 @@ type ScannerAF struct {
 	automaton *graph.Automata
 	name      string
 	F         graph.Set
+	Keywords  graph.Set
 	sigma     []string
 }
 
 type ScannerAFCombined struct {
 	automaton graph.Automata
 	F         map[*graph.Automata][]string
+	Keywords  map[*graph.Automata][]string
 }
 
 // TODO: move to utils
@@ -46,13 +48,19 @@ func MakeAFN(tkn token.TokenDescriptor) *ScannerAF {
 	// fmt.Printf("sigmas %v\n", sigmaNotEpsilon)
 	afnTree := evaluator.InOrder(node, sigmaNotEpsilon)
 	afn := afnTree.GetValue().(*graph.Automata)
-	afd := graph.NewAFDfromAFN(afn)
+	// afd := graph.NewAFDfromAFN(afn) FIXME:
+
+	keywords := *graph.NewSet()
+	if tkn.IsKeyword {
+		keywords = afn.F
+	}
 
 	// Return new Automaton
 	scannerAFN := &ScannerAF{
-		afd,
+		afn,
 		tkn.ID,
-		afd.F,
+		afn.F,
+		keywords,
 		ev.Alphabet,
 	}
 	return scannerAFN
@@ -108,6 +116,7 @@ func AddInParrallel(auts ...*ScannerAF) *ScannerAFCombined {
 
 	r.automaton = *start
 	r.F = map[*graph.Automata][]string{}
+	r.Keywords = map[*graph.Automata][]string{}
 	// AddAllFinals and map them
 	for _, aut := range auts {
 		for final := range aut.automaton.F.GetList() {
@@ -115,10 +124,16 @@ func AddInParrallel(auts ...*ScannerAF) *ScannerAFCombined {
 			if r.F[final] == nil {
 				t := []string{aut.name} //TODO: epsilon
 				r.F[final] = t
+				if len(aut.Keywords.GetItems()) > 0 {
+					r.Keywords[final] = t
+				}
 			} else {
 				t := r.F[final]
 				t = append(t, aut.name) //TODO: epsilon
 				r.F[final] = t
+				if len(aut.Keywords.GetItems()) > 0 {
+					r.Keywords[final] = t
+				}
 			}
 			// ADD to automaton
 			r.automaton.F.Add(final)
@@ -136,7 +151,6 @@ func MakeAFNS(tkns []token.TokenDescriptor) *ScannerAFCombined {
 	}
 
 	result := AddInParrallel(scannerAFs...)
-	evaluator.PrettyPrint(&result.automaton, "afdd", "ohyea")
 
 	return result
 }
@@ -153,6 +167,7 @@ func contains(tabSuccessStates map[*graph.Automata][]string, set *graph.Set) []s
 func (scanner *ScannerAFCombined) Simulate(text string) {
 	aut := &scanner.automaton
 	successStates := scanner.F
+	keywordsStates := scanner.Keywords
 
 	// init
 	S := aut.Eclouser(&aut.Qo, graph.NewSet()) // current state
@@ -182,6 +197,26 @@ func (scanner *ScannerAFCombined) Simulate(text string) {
 				g := contains(successStates, S)
 				if g != nil {
 					// if S is a goal state
+					k := contains(keywordsStates, S)
+					if k != nil {
+						// if this state is of an keyword
+						// it does not have more possible moves
+						stack = []*graph.Set{}     // reset stack
+						rememberIndex = []int{}    // reset index
+						rememberToken = []string{} // reset lexeme
+						// ----- We accept this as a token -----
+						lex := text[:i+1]                                  // truncate lex of token
+						text = text[i+1:]                                  // get rest of text
+						tokens = append(tokens, token.NewToken(k[0], lex)) // Add to token list
+						i = -1                                             // reset index of text
+						S = aut.Eclouser(&aut.Qo, graph.NewSet())          // reset automaton
+						if len(text) == 0 {
+							// if there is no more break
+							break
+						}
+						continue
+						// ------------------------------------
+					}
 
 					// look if next char causes an error
 					thereIsMore := false

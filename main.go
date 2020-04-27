@@ -95,17 +95,25 @@ func main() {
 	digit := MakeDigit()
 
 	var tkns []token.TokenDescriptor
+	// keywords
+	tkns = append(tkns, token.NewKeywordTokenDescriptor("compiler", "COMPILER"))
+	tkns = append(tkns, token.NewKeywordTokenDescriptor("characters", "CHARACTERS"))
+	tkns = append(tkns, token.NewKeywordTokenDescriptor("keywords", "KEYWORDS"))
+	tkns = append(tkns, token.NewKeywordTokenDescriptor("tokens", "TOKENS"))
+	tkns = append(tkns, token.NewKeywordTokenDescriptor("productions", "PRODUCTIONS"))
+	tkns = append(tkns, token.NewKeywordTokenDescriptor("chr", "CHR"))
+	// Tokens
 	tkns = append(tkns, token.NewTokenDescriptor("ident", fmt.Sprintf("%v(%v|%v)*", letter, letter, digit))) // ident -> letter.(letter|digit)*
 	tkns = append(tkns, token.NewTokenDescriptor("number", fmt.Sprintf("(%v)(%v*)", digit, digit)))          // number -> digit.(digit)*
 	tkns = append(tkns, token.NewTokenDescriptor("equal", "="))                                              // equal -> =
 	tkns = append(tkns, token.NewTokenDescriptor("finish", "."))                                             // finish -> .
-	tkns = append(tkns, token.NewTokenDescriptor("group_start", fmt.Sprintf("\\%v", "(")))                   // group_start -> (
-	tkns = append(tkns, token.NewTokenDescriptor("group_end", fmt.Sprintf("\\%v", ")")))                     // group_end -> (
-	tkns = append(tkns, token.NewTokenDescriptor("option_start", fmt.Sprintf("\\%v", "[")))                  // option_start -> [
-	tkns = append(tkns, token.NewTokenDescriptor("option_end", fmt.Sprintf("\\%v", "]")))                    // option_end -> ]
-	tkns = append(tkns, token.NewTokenDescriptor("iteration_start", fmt.Sprintf("\\%v", "{")))               // iteration_start -> {
-	tkns = append(tkns, token.NewTokenDescriptor("iteration_end", fmt.Sprintf("\\%v", "}")))                 // iteration_edn -> }
+	tkns = append(tkns, token.NewTokenDescriptor("group_start", "\\("))                                      // group_start -> (
+	tkns = append(tkns, token.NewTokenDescriptor("group_end", "\\)"))                                        // group_end -> (
+	tkns = append(tkns, token.NewTokenDescriptor("option_start", "["))                                       // option_start -> [
+	tkns = append(tkns, token.NewTokenDescriptor("option_end", "]"))                                         // option_end -> ]
+	tkns = append(tkns, token.NewTokenDescriptor("iteration_start", "{"))                                    // iteration_start -> {
+	tkns = append(tkns, token.NewTokenDescriptor("iteration_end", "}"))                                      // iteration_edn -> }
 
-	scanner.MakeAFNS(tkns).Simulate("(abs123=123.")
+	scanner.MakeAFNS(tkns).Simulate("COMPILER KEYWORDS asdasd (a=123) {}.")
 
 }
