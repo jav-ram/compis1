@@ -164,7 +164,7 @@ func contains(tabSuccessStates map[*graph.Automata][]string, set *graph.Set) []s
 	return nil
 }
 
-func (scanner *ScannerAFCombined) Simulate(text string) {
+func (scanner *ScannerAFCombined) Simulate(text string) []token.Token {
 	aut := &scanner.automaton
 	successStates := scanner.F
 	keywordsStates := scanner.Keywords
@@ -295,5 +295,7 @@ func (scanner *ScannerAFCombined) Simulate(text string) {
 	}
 
 	fmt.Printf("tokens: \n%v\n", tokens)
+
+	return tokens
 
 }

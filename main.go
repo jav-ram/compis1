@@ -6,6 +6,7 @@ import (
 
 	evaluator "github.com/ram16230/compis1/Evaluator"
 	graph "github.com/ram16230/compis1/Graph"
+	parser "github.com/ram16230/compis1/Parser"
 	scanner "github.com/ram16230/compis1/Scanner"
 	token "github.com/ram16230/compis1/Token"
 )
@@ -114,9 +115,12 @@ func main() {
 	tkns = append(tkns, token.NewTokenDescriptor("option_end", "]"))                                         // option_end -> ]
 	tkns = append(tkns, token.NewTokenDescriptor("iteration_start", "{"))                                    // iteration_start -> {
 	tkns = append(tkns, token.NewTokenDescriptor("iteration_end", "}"))                                      // iteration_edn -> }
-
+	tkns = append(tkns, token.NewTokenDescriptor("quote", "\""))                                             // quote -> "
 	scan := scanner.MakeAFNS(tkns)
 	data, _ := ioutil.ReadFile("./test/Aritmetica.ATG")
-	scan.Simulate(string(data))
+
+	tokens := scan.Simulate(string(data))
+
+	fmt.Printf("%v\n", parser.GetCharacters(tokens))
 
 }
