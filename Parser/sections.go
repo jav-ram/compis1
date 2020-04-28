@@ -27,8 +27,12 @@ func GetSections(tokenID string) func([]token.Token) []token.Token {
 		for _, tkn := range tokens {
 			if tkn.ID == tokenID {
 				write = true
+				continue
 			} else if isNotTokenID(tokenID, tkn.ID) {
 				fmt.Printf("%v\n", tkn)
+				if write {
+					return newTokens
+				}
 				write = false
 			}
 			if write {

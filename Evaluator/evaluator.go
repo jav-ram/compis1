@@ -174,6 +174,9 @@ func search(list []interface{}, s interface{}) int {
 
 func (ev *Evaluator) GetTree(input []interface{}) *tree.Node {
 	for i := 0; i < len(input); i++ {
+		if input[0] == "+" {
+			fmt.Printf("%v\n", input)
+		}
 		switch input[i].(type) {
 		case []interface{}:
 			{
@@ -189,7 +192,7 @@ func (ev *Evaluator) GetTree(input []interface{}) *tree.Node {
 				if ev.IsOperator(input[i].(string)) {
 					c := input[i].(string)
 
-					for search(input, "*") > 0 {
+					for search(input, "*") >= 0 {
 						n := tree.NewOpNode("*")
 						idx := search(input, "*")
 						l := ev.GetTree([]interface{}{input[idx-1]})
@@ -199,17 +202,24 @@ func (ev *Evaluator) GetTree(input []interface{}) *tree.Node {
 						input = remove(input, idx)
 					}
 
-					for search(input, "+") > 0 {
+					for search(input, "+") >= 0 {
+
 						n := tree.NewOpNode("+")
 						idx := search(input, "+")
-						l := ev.GetTree([]interface{}{input[idx-1]})
-						l.SetParent(n)
-						n.AddLeftChild(l)
-						input[idx-1] = n
-						input = remove(input, idx)
+						if len(input) > 1 {
+
+							l := ev.GetTree([]interface{}{input[idx-1]})
+							l.SetParent(n)
+							n.AddLeftChild(l)
+							input[idx-1] = n
+							input = remove(input, idx)
+						} else {
+							n := tree.NewLxNode(input[i].(string))
+							input[i] = n
+						}
 					}
 
-					for search(input, "?") > 0 {
+					for search(input, "?") >= 0 {
 						n := tree.NewOpNode("?")
 						idx := search(input, "?")
 						l := ev.GetTree([]interface{}{input[idx-1]})
@@ -219,7 +229,7 @@ func (ev *Evaluator) GetTree(input []interface{}) *tree.Node {
 						input = remove(input, idx)
 					}
 
-					for search(input, ".") > 0 {
+					for search(input, ".") >= 0 {
 						n := tree.NewOpNode(".")
 						idx := search(input, ".")
 						l := ev.GetTree([]interface{}{input[idx-1]})
@@ -232,17 +242,22 @@ func (ev *Evaluator) GetTree(input []interface{}) *tree.Node {
 						input = remove(input, idx)
 					}
 
-					for search(input, "|") > 0 {
+					for search(input, "|") >= 0 {
 						n := tree.NewOpNode(c)
 						idx := search(input, "|")
-						l := ev.GetTree([]interface{}{input[idx-1]})
-						l.SetParent(n)
-						r := ev.GetTree([]interface{}{input[idx+1]})
-						r.SetParent(n)
-						n.AddChilds(l, r)
-						input[idx-1] = n
-						input = remove(input, idx+1)
-						input = remove(input, idx)
+						if len(input) > 1 {
+							l := ev.GetTree([]interface{}{input[idx-1]})
+							l.SetParent(n)
+							r := ev.GetTree([]interface{}{input[idx+1]})
+							r.SetParent(n)
+							n.AddChilds(l, r)
+							input[idx-1] = n
+							input = remove(input, idx+1)
+							input = remove(input, idx)
+						} else {
+							n := tree.NewLxNode(input[i].(string))
+							input[i] = n
+						}
 					}
 				} else {
 					n := tree.NewLxNode(input[i].(string))

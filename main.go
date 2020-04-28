@@ -116,11 +116,14 @@ func main() {
 	tkns = append(tkns, token.NewTokenDescriptor("iteration_start", "{"))                                    // iteration_start -> {
 	tkns = append(tkns, token.NewTokenDescriptor("iteration_end", "}"))                                      // iteration_edn -> }
 	tkns = append(tkns, token.NewTokenDescriptor("quote", "\""))                                             // quote -> "
+	tkns = append(tkns, token.NewTokenDescriptor("sum", "\\+"))                                              // sum -> +
+	tkns = append(tkns, token.NewTokenDescriptor("subtract", "\\-"))                                         // subtract -> -
+	tkns = append(tkns, token.NewTokenDescriptor("or", "|"))                                                 // subtract -> -
 	scan := scanner.MakeAFNS(tkns)
 	data, _ := ioutil.ReadFile("./test/Aritmetica.ATG")
 
 	tokens := scan.Simulate(string(data))
 
-	fmt.Printf("%v\n", parser.GetCharacters(tokens))
+	parser.Parse(tokens)
 
 }
