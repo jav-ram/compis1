@@ -1,8 +1,6 @@
 package Parser
 
 import (
-	"fmt"
-
 	token "github.com/ram16230/compis1/Token"
 )
 
@@ -29,7 +27,6 @@ func GetSections(tokenID string) func([]token.Token) []token.Token {
 				write = true
 				continue
 			} else if isNotTokenID(tokenID, tkn.ID) {
-				fmt.Printf("%v\n", tkn)
 				if write {
 					return newTokens
 				}

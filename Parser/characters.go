@@ -80,7 +80,6 @@ func ParseCharactersDefinitions(tokens []token.Token, chars map[string]string) s
 			tokens = removeFromSlice(tokens, i+1)
 		} else if FindTokenIndex(tokens, "complete") != -1 {
 			i := FindTokenIndex(tokens, "complete")
-			fmt.Printf("%v-%v\n", i, len(tokens))
 			start := rune(tokens[i-1].Lexema[0])
 			end := rune(tokens[i+1].Lexema[0])
 			newText := ""
@@ -149,7 +148,7 @@ func ParseCharactersDefinitions(tokens []token.Token, chars map[string]string) s
 }
 
 // ParseCharacters parse the tokens inside characters
-func ParseCharacters(tokens []token.Token) string {
+func ParseCharacters(tokens []token.Token) (string, map[string]string) {
 	definitions := GetDefinitions(tokens)
 	// id -> production
 	chars := map[string]string{}
@@ -160,17 +159,20 @@ func ParseCharacters(tokens []token.Token) string {
 
 		charDesc := params[2]
 
+		fmt.Printf("%v\n\n", def)
+
 		d := ParseCharactersDefinitions(charDesc, chars)
 		chars[id] = d
 
 	}
 	text := ""
 	for i, d := range chars {
-		text = text + i + " := " + "\"" + d + "\" \n"
+		text = text + i + " := " + "`" + d + "` \n"
+		text = text + "_ = " + i + "\n"
 	}
 
-	fmt.Printf("%v\n", text)
+	// fmt.Printf("%v\n", text)
 
-	return text
+	return text, chars
 
 }
