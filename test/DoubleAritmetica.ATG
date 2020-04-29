@@ -2,6 +2,7 @@ COMPILER Double
 
 CHARACTERS 
 
+letter='a'..'z'.
 digit="0123456789".
 tab=CHR(9).
 eol=CHR(10).

@@ -44,7 +44,7 @@ func MakeAFN(tkn token.TokenDescriptor) *ScannerAF {
 	node := ev.GetTree(getList)
 
 	// AFN
-	sigmaNotEpsilon := delete(ev.Alphabet, "'")
+	sigmaNotEpsilon := delete(ev.Alphabet, "`")
 	// fmt.Printf("sigmas %v\n", sigmaNotEpsilon)
 	afnTree := evaluator.InOrder(node, sigmaNotEpsilon)
 	afn := afnTree.GetValue().(*graph.Automata)
@@ -82,12 +82,12 @@ func AddInParrallel(auts ...*ScannerAF) *ScannerAFCombined {
 
 				// make a transition from final to initial with sigma
 				if start.Trans[final] == nil {
-					t := map[string][]*graph.Automata{"'": []*graph.Automata{}} //TODO: epsilon
-					t["'"] = append(t["'"], initial)                            //TODO: epsilon
+					t := map[string][]*graph.Automata{"`": []*graph.Automata{}} //TODO: epsilon
+					t["`"] = append(t["`"], initial)                            //TODO: epsilon
 					start.Trans[final] = t
 				} else {
 					t := start.Trans[final]          //TODO: epsilon
-					t["'"] = append(t["'"], initial) //TODO: epsilon
+					t["`"] = append(t["`"], initial) //TODO: epsilon
 					start.Trans[final] = t
 				}
 			}

@@ -7,6 +7,32 @@ import (
 	token "github.com/ram16230/compis1/Token"
 )
 
+func trimQuotes(s string) string {
+	if len(s) >= 2 {
+		if s[0] == '\'' && s[len(s)-1] == '\'' {
+			return s[1 : len(s)-1]
+		}
+	}
+	return s
+}
+
+func removeFromSet(set string, minus string) string {
+	newText := ""
+	for _, m := range minus {
+		for i := 0; i < len(set); i++ {
+			s := rune(set[i])
+			if m != s || (m == '|' && s == '|') {
+				newText = newText + string(s)
+			} else {
+				if i+1 <= len(set) {
+					i++
+				}
+			}
+		}
+	}
+	return newText
+}
+
 func removeFromSlice(slice []token.Token, i int) []token.Token {
 	copy(slice[i:], slice[i+1:])
 	slice[len(slice)-1] = token.Token{}
@@ -31,11 +57,12 @@ func fromStringToSet(text string) string {
 	return ""
 }
 
-func ParseCharactersDefinitions(tokens []token.Token) string {
+func ParseCharactersDefinitions(tokens []token.Token, chars map[string]string) string {
 	for {
 		if FindTokenIndex(tokens, "chr") != -1 {
 			i := FindTokenIndex(tokens, "chr")
 			tmp, _ := strconv.Atoi(tokens[i+2].Lexema)
+			//char := trimQuotes(strconv.QuoteRune(rune(tmp)))
 			char := string(rune(tmp))
 			newToken := token.NewToken("set", char)
 			// delete i, i+1, i+2, i+3
@@ -51,10 +78,66 @@ func ParseCharactersDefinitions(tokens []token.Token) string {
 			tokens[i] = newToken
 			tokens = removeFromSlice(tokens, i+2)
 			tokens = removeFromSlice(tokens, i+1)
+		} else if FindTokenIndex(tokens, "complete") != -1 {
+			i := FindTokenIndex(tokens, "complete")
+			fmt.Printf("%v-%v\n", i, len(tokens))
+			start := rune(tokens[i-1].Lexema[0])
+			end := rune(tokens[i+1].Lexema[0])
+			newText := ""
+
+			for i := int(start); i <= int(end); i++ {
+				if i == int(end) {
+					newText = newText + string(rune(i))
+				} else {
+					newText = newText + string(rune(i)) + "|"
+				}
+			}
+
+			newToken := token.NewToken("set", newText)
+
+			tokens[i-1] = newToken
+			tokens = removeFromSlice(tokens, i+1)
+			tokens = removeFromSlice(tokens, i)
+
 		} else if FindTokenIndex(tokens, "sum") != -1 {
 			i := FindTokenIndex(tokens, "sum")
 			// TODO: target to idents, get ident of another character
-			newToken := token.NewToken("set", fmt.Sprintf("%v|%v", i-1, i+1))
+			l := ""
+			r := ""
+			if tokens[i-1].ID == "ident" {
+				l = chars[tokens[i-1].Lexema]
+			} else if tokens[i-1].ID == "set" {
+				l = tokens[i-1].Lexema
+			}
+
+			if tokens[i+1].ID == "ident" {
+				r = chars[tokens[i+1].Lexema]
+			} else if tokens[i+1].ID == "set" {
+				r = tokens[i+1].Lexema
+			}
+			newToken := token.NewToken("set", fmt.Sprintf("%v|%v", l, r))
+
+			tokens[i-1] = newToken
+			tokens = removeFromSlice(tokens, i+1)
+			tokens = removeFromSlice(tokens, i)
+		} else if FindTokenIndex(tokens, "subtract") != -1 {
+			i := FindTokenIndex(tokens, "subtract")
+			// TODO: target to idents, get ident of another character
+			l := ""
+			r := ""
+			if tokens[i-1].ID == "ident" {
+				l = chars[tokens[i-1].Lexema]
+			} else if tokens[i-1].ID == "set" {
+				l = tokens[i-1].Lexema
+			}
+
+			if tokens[i+1].ID == "ident" {
+				r = chars[tokens[i+1].Lexema]
+			} else if tokens[i+1].ID == "set" {
+				r = tokens[i+1].Lexema
+			}
+			s := removeFromSet(l, r)
+			newToken := token.NewToken("set", s)
 
 			tokens[i-1] = newToken
 			tokens = removeFromSlice(tokens, i+1)
@@ -68,22 +151,25 @@ func ParseCharactersDefinitions(tokens []token.Token) string {
 // ParseCharacters parse the tokens inside characters
 func ParseCharacters(tokens []token.Token) string {
 	definitions := GetDefinitions(tokens)
-	idents := []string{}
-	descriptions := []string{}
+	// id -> production
+	chars := map[string]string{}
 
 	for _, def := range definitions {
 		params := GetDefinitionParams(def)
-		idents = append(idents, params[0][0].Lexema)
+		id := params[0][0].Lexema
 
 		charDesc := params[2]
 
-		descriptions = append(descriptions, ParseCharactersDefinitions(charDesc))
+		d := ParseCharactersDefinitions(charDesc, chars)
+		chars[id] = d
 
 	}
 	text := ""
-	for i := range definitions {
-		text = text + idents[i] + " := " + "\"" + descriptions[i] + "\" \n"
+	for i, d := range chars {
+		text = text + i + " := " + "\"" + d + "\" \n"
 	}
+
+	fmt.Printf("%v\n", text)
 
 	return text
 

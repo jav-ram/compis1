@@ -6,7 +6,7 @@ func (aut *Automata) Eclouser(state *Set, visited *Set) *Set {
 	for k := range state.list {
 		r.Adds(k)
 		for c, a := range aut.Trans[k] {
-			if c == "'" { // TODO: epsilon
+			if c == "`" { // TODO: epsilon
 				b := []*Automata{}
 				for _, t := range a {
 					if !visited.Has(t) {

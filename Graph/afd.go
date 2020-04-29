@@ -26,14 +26,14 @@ func Nullable(root *tree.Node) bool {
 			} else if c == "*" {
 				// klean
 				return true
-			} else if c == "'" {
+			} else if c == "`" {
 				return true
 			}
 		}
 	case map[string][]string:
 		{
 			// leaf
-			if c["v"][0] == "'" {
+			if c["v"][0] == "`" {
 				return true
 			}
 			return false
@@ -66,8 +66,8 @@ func IDTreeSet() func(tree.Node) (tree.Node, map[string]tree.Node) {
 
 		if root.Lchild != nil {
 			l := root.Lchild
-			if l.GetValue() == "'" {
-				l.SetValue("'")
+			if l.GetValue() == "`" {
+				l.SetValue("`")
 			} else if l.Lchild == nil && l.Rchild == nil {
 				i++
 				m := map[string][]string{}
@@ -95,8 +95,8 @@ func IDTreeSet() func(tree.Node) (tree.Node, map[string]tree.Node) {
 		}
 		if root.Rchild != nil {
 			r := root.Rchild
-			if r.GetValue() == "'" {
-				r.SetValue("'")
+			if r.GetValue() == "`" {
+				r.SetValue("`")
 			} else if r.Lchild == nil && r.Rchild == nil {
 				i++
 				m := map[string][]string{}
@@ -133,7 +133,7 @@ func FirstPos(root tree.Node) []string {
 	switch c := root.GetValue().(type) {
 	case string:
 		{
-			if c == "'" {
+			if c == "`" {
 				// epsilon
 				return []string{}
 			} else if c == "|" {
@@ -184,7 +184,7 @@ func LastPos(root tree.Node) []string {
 	switch c := root.GetValue().(type) {
 	case string:
 		{
-			if c == "'" {
+			if c == "`" {
 				// epsilon
 				return []string{}
 			} else if c == "|" {

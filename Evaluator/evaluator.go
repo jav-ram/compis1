@@ -137,7 +137,7 @@ func (ev *Evaluator) Separator(input string) (result []interface{}, Alphabet []s
 			}
 		}
 	}
-	Alphabet = append(Alphabet, "'")
+	Alphabet = append(Alphabet, "`")
 	return result, unique(Alphabet)
 }
 
@@ -390,7 +390,7 @@ func PrettyPrint(aut *graph.Automata, dir string, name string) {
 			i++
 		}
 		for c, is := range value[k] {
-			if c == "'" { //TODO: epsilon
+			if c == "`" { //TODO: epsilon
 				c = "ɛ"
 			}
 			for _, j := range is {

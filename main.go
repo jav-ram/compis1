@@ -36,7 +36,7 @@ func SimulateAll(t string, rg string) {
 	//printTree(node)
 
 	//AFN
-	sigmaNotEpsilon := delete(ev.Alphabet, "'")
+	sigmaNotEpsilon := delete(ev.Alphabet, "`")
 	fmt.Printf("Alphabet%v\n", alphabet)
 	// fmt.Printf("sigmas %v\n", sigmaNotEpsilon)
 	afnTree := evaluator.InOrder(node, sigmaNotEpsilon)
@@ -109,18 +109,19 @@ func main() {
 	tkns = append(tkns, token.NewTokenDescriptor("number", fmt.Sprintf("(%v)(%v*)", digit, digit)))          // number -> digit.(digit)*
 	tkns = append(tkns, token.NewTokenDescriptor("equal", "="))                                              // equal -> =
 	tkns = append(tkns, token.NewTokenDescriptor("finish", "."))                                             // finish -> .
+	tkns = append(tkns, token.NewTokenDescriptor("complete", ".."))                                          // complete -> ..
 	tkns = append(tkns, token.NewTokenDescriptor("group_start", "\\("))                                      // group_start -> (
 	tkns = append(tkns, token.NewTokenDescriptor("group_end", "\\)"))                                        // group_end -> (
 	tkns = append(tkns, token.NewTokenDescriptor("option_start", "["))                                       // option_start -> [
 	tkns = append(tkns, token.NewTokenDescriptor("option_end", "]"))                                         // option_end -> ]
 	tkns = append(tkns, token.NewTokenDescriptor("iteration_start", "{"))                                    // iteration_start -> {
 	tkns = append(tkns, token.NewTokenDescriptor("iteration_end", "}"))                                      // iteration_edn -> }
-	tkns = append(tkns, token.NewTokenDescriptor("quote", "\""))                                             // quote -> "
+	tkns = append(tkns, token.NewTokenDescriptor("quote", `"|'`))                                            // quote -> "
 	tkns = append(tkns, token.NewTokenDescriptor("sum", "\\+"))                                              // sum -> +
 	tkns = append(tkns, token.NewTokenDescriptor("subtract", "\\-"))                                         // subtract -> -
 	tkns = append(tkns, token.NewTokenDescriptor("or", "|"))                                                 // subtract -> -
 	scan := scanner.MakeAFNS(tkns)
-	data, _ := ioutil.ReadFile("./test/Aritmetica.ATG")
+	data, _ := ioutil.ReadFile("./test/DoubleAritmetica.ATG")
 
 	tokens := scan.Simulate(string(data))
 
