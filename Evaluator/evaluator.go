@@ -229,19 +229,6 @@ func (ev *Evaluator) GetTree(input []interface{}) *tree.Node {
 						input = remove(input, idx)
 					}
 
-					for search(input, ".") >= 0 {
-						n := tree.NewOpNode(".")
-						idx := search(input, ".")
-						l := ev.GetTree([]interface{}{input[idx-1]})
-						l.SetParent(n)
-						r := ev.GetTree([]interface{}{input[idx+1]})
-						r.SetParent(n)
-						n.AddChilds(l, r)
-						input[idx-1] = n
-						input = remove(input, idx+1)
-						input = remove(input, idx)
-					}
-
 					for search(input, "|") >= 0 {
 						n := tree.NewOpNode(c)
 						idx := search(input, "|")
@@ -277,7 +264,6 @@ func (ev *Evaluator) GetTree(input []interface{}) *tree.Node {
 			r.SetParent(n)
 			n.AddChilds(l, r)
 			input[0] = n
-			input = remove(input, i)
 		}
 	}
 

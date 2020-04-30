@@ -43,6 +43,8 @@ func MakeAFN(tkn token.TokenDescriptor) *ScannerAF {
 	ev.Alphabet = alphabet // set alphabet
 	node := ev.GetTree(getList)
 
+	evaluator.PrintTree(node)
+
 	// AFN
 	sigmaNotEpsilon := delete(ev.Alphabet, "`")
 	// fmt.Printf("sigmas %v\n", sigmaNotEpsilon)
@@ -111,8 +113,6 @@ func AddInParrallel(auts ...*ScannerAF) *ScannerAFCombined {
 			}
 		}
 	}
-
-	fmt.Printf("Transitions %v\n", start.Trans)
 
 	r.automaton = *start
 	r.F = map[*graph.Automata][]string{}
