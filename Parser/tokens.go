@@ -11,12 +11,26 @@ func parseTokenDefinition(tokens []token.Token) string {
 			n := token.NewToken("string", "")
 			tokens[i] = n
 		} else if FindTokenIndex(tokens, "quote") != -1 {
-			i := FindTokenIndex(tokens, "quote")
-			newToken := token.NewToken("string", fromStringToSet(tokens[i+1].Lexema))
+			start := FindTokenIndex(tokens, "quote")
+			text := ""
+			end := -1
 
-			tokens[i] = newToken
-			tokens = removeFromSlice(tokens, i+2)
-			tokens = removeFromSlice(tokens, i+1)
+			for i := start + 1; i < len(tokens); i++ {
+				if tokens[i].ID == "quote" {
+					end = i
+					break
+				} else {
+					text = text + tokens[i].Lexema
+				}
+			}
+
+			newToken := token.NewToken("string", text)
+
+			tokens[start] = newToken
+
+			for i := end; i > start; i-- {
+				tokens = removeFromSlice(tokens, i)
+			}
 		} else if FindTokenIndex(tokens, "ident") != -1 {
 			i := FindTokenIndex(tokens, "ident")
 			newToken := token.NewToken("var", tokens[i].Lexema)
@@ -78,6 +92,14 @@ func parseTokenDefinition(tokens []token.Token) string {
 		} else {
 			text := ""
 			wasString := false
+
+			if tokens[0].ID == "string" {
+				wasString = true
+				text = text + `"`
+			} else {
+				wasString = false
+			}
+
 			for _, t := range tokens {
 				if t.ID == "string" {
 					if wasString {

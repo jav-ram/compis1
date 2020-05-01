@@ -18,19 +18,21 @@ func trimQuotes(s string) string {
 
 func removeFromSet(set string, minus string) string {
 	newText := ""
-	for _, m := range minus {
-		for i := 0; i < len(set); i++ {
-			s := rune(set[i])
-			if m != s || (m == '|' && s == '|') {
-				newText = newText + string(s)
-			} else {
-				if i+1 <= len(set) {
-					i++
-				}
+	for i := 0; i < len(set); i++ {
+		isIn := false
+		s := rune(set[i])
+		for _, m := range minus {
+			if m == s || s == '|' {
+				isIn = true
+				break
 			}
 		}
+		if !isIn {
+			newText = newText + string(set[i])
+		}
 	}
-	return newText
+
+	return fromStringToSet(newText)
 }
 
 func removeFromSlice(slice []token.Token, i int) []token.Token {
