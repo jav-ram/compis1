@@ -6,7 +6,11 @@ import (
 
 func parseTokenDefinition(tokens []token.Token) string {
 	for {
-		if FindTokenIndex(tokens, "quote") != -1 {
+		if FindTokenIndex(tokens, "except") != -1 {
+			i := FindTokenIndex(tokens, "except")
+			n := token.NewToken("string", "")
+			tokens[i] = n
+		} else if FindTokenIndex(tokens, "quote") != -1 {
 			i := FindTokenIndex(tokens, "quote")
 			newToken := token.NewToken("string", fromStringToSet(tokens[i+1].Lexema))
 

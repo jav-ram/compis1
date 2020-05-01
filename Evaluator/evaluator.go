@@ -206,7 +206,7 @@ func (ev *Evaluator) GetTree(input []interface{}) *tree.Node {
 
 						n := tree.NewOpNode("+")
 						idx := search(input, "+")
-						if len(input) > 1 {
+						if len(input) > 1 && i-1 >= 0 {
 
 							l := ev.GetTree([]interface{}{input[idx-1]})
 							l.SetParent(n)

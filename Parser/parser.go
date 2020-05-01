@@ -75,7 +75,7 @@ func main() {
 func finishFile() string {
 	return `
 scan := scanner.MakeAFNS(tkns)
-data, _ := ioutil.ReadFile("./test/DoubleAritmetica.ATG")
+data, _ := ioutil.ReadFile("./test/test.txt")
 
 tokens := scan.Simulate(string(data))
 fmt.Printf("%v\n", tokens)

@@ -104,6 +104,7 @@ func main() {
 	tkns = append(tkns, token.NewKeywordTokenDescriptor("tokens", "TOKENS"))
 	tkns = append(tkns, token.NewKeywordTokenDescriptor("productions", "PRODUCTIONS"))
 	tkns = append(tkns, token.NewKeywordTokenDescriptor("chr", "CHR"))
+	tkns = append(tkns, token.NewKeywordTokenDescriptor("except", "EXCEPT KEYWORDS"))
 	// Tokens
 	tkns = append(tkns, token.NewTokenDescriptor("ident", fmt.Sprintf("%v(%v|%v)*", letter, letter, digit))) // ident -> letter.(letter|digit)*
 	tkns = append(tkns, token.NewTokenDescriptor("number", fmt.Sprintf("(%v)(%v*)", digit, digit)))          // number -> digit.(digit)*

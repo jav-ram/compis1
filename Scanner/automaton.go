@@ -210,6 +210,7 @@ func (scanner *ScannerAFCombined) Simulate(text string) []token.Token {
 						tokens = append(tokens, token.NewToken(k[0], lex)) // Add to token list
 						i = -1                                             // reset index of text
 						S = aut.Eclouser(&aut.Qo, graph.NewSet())          // reset automaton
+						lexeme = ""                                        // reset lexeme
 						if len(text) == 0 {
 							// if there is no more break
 							break
@@ -250,7 +251,14 @@ func (scanner *ScannerAFCombined) Simulate(text string) []token.Token {
 						// ------------------------------------
 					}
 
+				} else {
+					if len(text)-1 == i {
+						// if there is no more break
+						text = ""
+						break
+					}
 				}
+
 				/* fmt.Printf("S %v \n", S)
 				fmt.Printf("tokens %v \n", tokens) */
 			} else {

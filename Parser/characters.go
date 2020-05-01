@@ -167,7 +167,7 @@ func ParseCharacters(tokens []token.Token) (string, map[string]string) {
 	}
 	text := ""
 	for i, d := range chars {
-		text = text + i + " := " + "`" + d + "` \n"
+		text = text + i + " := " + "`(" + d + ")` \n"
 		text = text + "_ = " + i + "\n"
 	}
 
