@@ -27,7 +27,7 @@ func (token Token) SetAttributes(attributes ...string) {
 
 // String custom print
 func (token Token) String() string {
-	return fmt.Sprintf("<'%v', '%v'>", token.ID, token.Lexema)
+	return fmt.Sprintf("<'%v', '%v'>\n", token.ID, token.Lexema)
 }
 
 func NewTokenDescriptor(id string, rgs string) TokenDescriptor {
