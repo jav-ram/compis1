@@ -127,11 +127,11 @@ func (first *Automata) AddBySide(second *Automata) *Automata {
 	for tf := range first.F.list {
 		for to := range second.Qo.list {
 			if trans[tf] == nil {
-				t := map[string][]*Automata{"'": []*Automata{to}} //TODO: epsilon
+				t := map[string][]*Automata{"`": []*Automata{to}} //TODO: epsilon
 				trans[tf] = t
 			} else {
 				t := trans[tf]
-				t["'"] = append(t["'"], to) //TODO: epsilon
+				t["`"] = append(t["`"], to) //TODO: epsilon
 				trans[tf] = t
 			}
 		}
@@ -183,11 +183,11 @@ func NewAFNKlean(sigma []string, aut *Automata) *Automata {
 	for to := range s.Qo.list {
 		for tf := range l.F.list {
 			if r.Trans[to] == nil {
-				t := map[string][]*Automata{"'": []*Automata{tf}} //TODO: epsilon
+				t := map[string][]*Automata{"`": []*Automata{tf}} //TODO: epsilon
 				r.Trans[to] = t
 			} else {
 				t := r.Trans[to]
-				t["'"] = append(t["'"], tf) //TODO: epsilon
+				t["`"] = append(t["`"], tf) //TODO: epsilon
 				r.Trans[to] = t
 			}
 		}
@@ -197,7 +197,7 @@ func NewAFNKlean(sigma []string, aut *Automata) *Automata {
 	for tf := range aut.F.list {
 		for to := range aut.Qo.list {
 			t := r.Trans[tf]
-			t["'"] = append(t["'"], to) //TODO: epsilon
+			t["`"] = append(t["`"], to) //TODO: epsilon
 			r.Trans[tf] = t
 		}
 	}
@@ -231,20 +231,20 @@ func NewAFNKOr(sigma []string, a *Automata, b *Automata) *Automata {
 	r.Trans = MergeTrans(r.Trans, a.Trans)
 	r.Trans = MergeTrans(r.Trans, b.Trans)
 
-	t := map[string][]*Automata{"'": []*Automata{}} //TODO: epsilon
-	t["'"] = append(t["'"], tmp1.Trans[s]["'"]...)  //TODO: epsilon
-	t["'"] = append(t["'"], tmp2.Trans[s]["'"]...)  //TODO: epsilon
+	t := map[string][]*Automata{"`": []*Automata{}} //TODO: epsilon
+	t["`"] = append(t["`"], tmp1.Trans[s]["`"]...)  //TODO: epsilon
+	t["`"] = append(t["`"], tmp2.Trans[s]["`"]...)  //TODO: epsilon
 	r.Trans[s] = t
 
 	// segundas trancisiónadd
 	for kf := range a.F.list {
 		for ko := range f.Qo.list {
 			if r.Trans[kf] == nil {
-				t := map[string][]*Automata{"'": []*Automata{ko}} //TODO: epsilon
+				t := map[string][]*Automata{"`": []*Automata{ko}} //TODO: epsilon
 				r.Trans[kf] = t
 			} else {
 				t := r.Trans[kf]
-				t["'"] = append(t["'"], ko) //TODO: epsilon
+				t["`"] = append(t["`"], ko) //TODO: epsilon
 				r.Trans[kf] = t
 			}
 		}
@@ -253,11 +253,11 @@ func NewAFNKOr(sigma []string, a *Automata, b *Automata) *Automata {
 	for kf := range b.F.list {
 		for ko := range f.Qo.list {
 			if r.Trans[kf] == nil {
-				t := map[string][]*Automata{"'": []*Automata{ko}} //TODO: epsilon
+				t := map[string][]*Automata{"`": []*Automata{ko}} //TODO: epsilon
 				r.Trans[kf] = t
 			} else {
 				t := r.Trans[kf]
-				t["'"] = append(t["'"], ko) //TODO: epsilon
+				t["`"] = append(t["`"], ko) //TODO: epsilon
 				r.Trans[kf] = t
 			}
 		}
@@ -275,7 +275,7 @@ func NewAFNSum(sigma []string, aut *Automata) *Automata {
 
 // NewAFNQuestion un automata de ?
 func NewAFNQuestion(sigma []string, aut *Automata) *Automata {
-	f := SingleAFN(sigma, "'") //TODO: epsilon
+	f := SingleAFN(sigma, "`") //TODO: epsilon
 	r := NewAFNKOr(sigma, aut, f)
 	return r
 }

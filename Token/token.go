@@ -10,8 +10,9 @@ type Token struct {
 }
 
 type TokenDescriptor struct {
-	ID  string
-	Rgx string
+	ID        string
+	Rgx       string
+	IsKeyword bool
 }
 
 // NewToken makes a new token
@@ -26,9 +27,13 @@ func (token Token) SetAttributes(attributes ...string) {
 
 // String custom print
 func (token Token) String() string {
-	return fmt.Sprintf("<'%v', '%v'>", token.ID, token.Lexema)
+	return fmt.Sprintf("<'%v', '%v'>\n", token.ID, token.Lexema)
 }
 
 func NewTokenDescriptor(id string, rgs string) TokenDescriptor {
-	return TokenDescriptor{id, rgs}
+	return TokenDescriptor{id, rgs, false}
+}
+
+func NewKeywordTokenDescriptor(id string, rgs string) TokenDescriptor {
+	return TokenDescriptor{id, rgs, true}
 }
