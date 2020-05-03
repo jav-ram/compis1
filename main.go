@@ -122,9 +122,13 @@ func main() {
 	tkns = append(tkns, token.NewTokenDescriptor("subtract", "\\-"))                                         // subtract -> -
 	tkns = append(tkns, token.NewTokenDescriptor("or", "|"))                                                 // subtract -> -
 	scan := scanner.MakeAFNS(tkns)
-	data, _ := ioutil.ReadFile("./test/HexNumber.ATG")
+	data, _ := ioutil.ReadFile("./test/Aritmetica.ATG")
 
 	tokens := scan.Simulate(string(data))
+
+	fmt.Println("------------------")
+	fmt.Printf("tokens %v\n", tokens)
+	fmt.Println("------------------")
 
 	parser.Parse(tokens)
 
