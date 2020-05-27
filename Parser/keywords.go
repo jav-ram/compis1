@@ -13,8 +13,8 @@ func ParseKeywords(tokens []token.Token) string {
 
 	for _, def := range definitions {
 		params := GetDefinitionParams(def)
-		ident := params[0][0].Lexema
-		desc := params[2][1].Lexema
+		ident := GetDefinitionName(params[0])
+		desc := GetDefinitionName(params[2])
 		idents = append(idents, ident)
 		descriptions = append(descriptions, desc)
 

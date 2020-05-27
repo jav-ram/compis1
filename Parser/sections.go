@@ -6,7 +6,7 @@ import (
 
 // isNotTokenID returns true if the source is inside of the tokensIds register and diferent to target
 func isNotTokenID(target string, source string) bool {
-	tokenIds := []string{"compiler", "characters", "keywords", "tokens", "productions"}
+	tokenIds := []string{"compiler", "characters", "keywords", "tokens", "productions", "end"}
 
 	for _, tokenID := range tokenIds {
 		if tokenID == source && target != tokenID {

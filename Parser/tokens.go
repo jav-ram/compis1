@@ -122,13 +122,16 @@ func parseTokenDefinition(tokens []token.Token) string {
 	}
 }
 
-func ParseTokens(tokens []token.Token) string {
+func ParseTokens(tokens []token.Token) (string, []string) {
 	definitions := GetDefinitions(tokens)
+	ids := []string{}
 	tk := map[string]string{}
 
 	for _, def := range definitions {
 		params := GetDefinitionParams(def)
-		id := params[0][0].Lexema
+		id := GetDefinitionName(params[0])
+
+		ids = append(ids, id)
 
 		tokenDesc := params[2]
 
@@ -141,5 +144,5 @@ func ParseTokens(tokens []token.Token) string {
 		text = text + "tkns = append(tkns, token.NewTokenDescriptor(\"" + i + "\", " + d + "))\n"
 	}
 
-	return text
+	return text, ids
 }

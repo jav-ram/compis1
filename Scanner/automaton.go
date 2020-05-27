@@ -289,9 +289,10 @@ func (scanner *ScannerAFCombined) Simulate(text string) []token.Token {
 					rememberIndex = []int{}    // reset index
 					rememberToken = []string{} // reset lexeme
 					// ----- We accept this as a token -----
-					text = text[i+1:]                         // get rest of text
-					i = -1                                    // reset index of text
-					S = aut.Eclouser(&aut.Qo, graph.NewSet()) // reset automaton
+					tokens = append(tokens, token.NewToken("any", string(text[i]))) // Add to token list
+					text = text[i+1:]                                               // get rest of text
+					i = -1                                                          // reset index of text
+					S = aut.Eclouser(&aut.Qo, graph.NewSet())                       // reset automaton
 					if len(text) == 0 {
 						// if there is no more break
 						break

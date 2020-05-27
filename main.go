@@ -103,6 +103,7 @@ func main() {
 	tkns = append(tkns, token.NewKeywordTokenDescriptor("keywords", "KEYWORDS"))
 	tkns = append(tkns, token.NewKeywordTokenDescriptor("tokens", "TOKENS"))
 	tkns = append(tkns, token.NewKeywordTokenDescriptor("productions", "PRODUCTIONS"))
+	tkns = append(tkns, token.NewKeywordTokenDescriptor("end", "END"))
 	tkns = append(tkns, token.NewKeywordTokenDescriptor("chr", "CHR"))
 	tkns = append(tkns, token.NewKeywordTokenDescriptor("except", "EXCEPT KEYWORDS"))
 	// Tokens
@@ -121,6 +122,11 @@ func main() {
 	tkns = append(tkns, token.NewTokenDescriptor("sum", "\\+"))                                              // sum -> +
 	tkns = append(tkns, token.NewTokenDescriptor("subtract", "\\-"))                                         // subtract -> -
 	tkns = append(tkns, token.NewTokenDescriptor("or", "|"))                                                 // subtract -> -
+	tkns = append(tkns, token.NewTokenDescriptor("translation_start", "\\(."))                               // group_start -> (
+	tkns = append(tkns, token.NewTokenDescriptor("translation_end", "\\.)"))                                 // group_start -> (
+	tkns = append(tkns, token.NewTokenDescriptor("params_start", "<"))                                       // group_start -> (
+	tkns = append(tkns, token.NewTokenDescriptor("params_end", ">"))                                         // group_start -> (
+	tkns = append(tkns, token.NewTokenDescriptor("break", "\n"))                                             // group_start -> (
 	scan := scanner.MakeAFNS(tkns)
 	data, _ := ioutil.ReadFile("./test/Aritmetica.ATG")
 

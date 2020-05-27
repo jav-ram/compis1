@@ -59,6 +59,16 @@ func fromStringToSet(text string) string {
 	return ""
 }
 
+func CleanCharactes(tokens []token.Token) []token.Token {
+	newToken := []token.Token{}
+	for _, tkn := range tokens {
+		if tkn.ID != "any" {
+			newToken = append(newToken, tkn)
+		}
+	}
+	return newToken
+}
+
 func ParseCharactersDefinitions(tokens []token.Token, chars map[string]string) string {
 	for {
 		if FindTokenIndex(tokens, "chr") != -1 {
@@ -157,12 +167,12 @@ func ParseCharacters(tokens []token.Token) (string, map[string]string) {
 
 	for _, def := range definitions {
 		params := GetDefinitionParams(def)
-		id := params[0][0].Lexema
+		id := GetDefinitionName(params[0])
+		fmt.Printf("id %v\n", id)
 
-		charDesc := params[2]
+		charDesc := CleanCharactes(params[2])
 
-		fmt.Printf("%v\n\n", def)
-
+		fmt.Printf("def %v\n", charDesc)
 		d := ParseCharactersDefinitions(charDesc, chars)
 		chars[id] = d
 

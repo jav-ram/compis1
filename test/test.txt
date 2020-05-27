@@ -1,9 +1,1 @@
-+1112.055
--2352 
-4531      
-assdasfp
-while
-do
-switch do
-AH
-123abc
+20*(5+1);
