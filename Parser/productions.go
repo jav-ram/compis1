@@ -571,7 +571,7 @@ index = curr
 	return newString
 }
 
-func ParseProductions(tokens []token.Token, tokenList []string) string {
+func ParseProductions(tokens []token.Token, tokenList []string) (string, string) {
 	definitions := GetProductionsDefinitions(tokens)
 	productions := []string{}
 	code := ""
@@ -604,5 +604,5 @@ _ = curr
 ` + Translate(GetOrs(GetList(definition, tokenList)), false) + "\nreturn status\n}\n"
 	}
 
-	return code
+	return code, productions[0] + "()"
 }

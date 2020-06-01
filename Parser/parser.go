@@ -82,6 +82,7 @@ import (
 
 var list []token.Token = []token.Token{}
 var index int = 0
+var lastToken = token.NewToken("", "")
 
 func Expect(item interface{}) bool {
 	i := index
@@ -125,8 +126,9 @@ func Read(item interface{}) bool {
 	} else {
 		status = false
 	}
-
+	
 	if status {
+		lastToken = list[index]
 		index++
 	}
 
@@ -136,14 +138,14 @@ func Read(item interface{}) bool {
 `
 }
 
-func finishFile() string {
+func finishFile(production string) string {
 	return `
 scan := scanner.MakeAFNS(tkns)
 data, _ := ioutil.ReadFile("./test/test.txt")
 
 tokens := scan.Simulate(string(data))
 list = tokens
-fmt.Printf("%v\n", tokens)
+` + production + `
 }
 `
 }
@@ -153,7 +155,7 @@ func Parse(tokens []token.Token) {
 	char, _ := ParseCharacters(GetCharacters(tokens))
 	keywords := ParseKeywords(GetKeywords(tokens))
 	tkns, idsTkns := ParseTokens(GetTokens(tokens))
-	production := ParseProductions(GetProductions(tokens), idsTkns) // TODO: change it to keywords, and tkns
-	text = text + production + "func main() {\n" + char + "\n" + keywords + "\n" + tkns + "\n" + finishFile()
+	production, firstProduction := ParseProductions(GetProductions(tokens), idsTkns) // TODO: change it to keywords, and tkns
+	text = text + production + "func main() {\n" + char + "\n" + keywords + "\n" + tkns + "\n" + finishFile(firstProduction)
 	ioutil.WriteFile("result.go", []byte(text), 0644)
 }
