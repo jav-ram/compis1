@@ -1,0 +1,27 @@
+digraph G {
+	rankdir=LR;
+	0->1[ label=6 ];
+	0->1[ label=7 ];
+	0->1[ label=8 ];
+	0->1[ label=2 ];
+	0->1[ label=3 ];
+	0->1[ label=4 ];
+	0->1[ label=5 ];
+	0->1[ label=9 ];
+	0->1[ label=0 ];
+	0->1[ label=1 ];
+	1->1[ label=5 ];
+	1->1[ label=7 ];
+	1->1[ label=9 ];
+	1->1[ label=0 ];
+	1->1[ label=3 ];
+	1->1[ label=4 ];
+	1->1[ label=8 ];
+	1->1[ label=1 ];
+	1->1[ label=2 ];
+	1->1[ label=6 ];
+	0 [ shape=square ];
+	1 [ shape=doublecircle ];
+
+}
+

@@ -9,7 +9,7 @@
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "./evaluator.go",
+      "program": "./result.go",
       "env": {},
       "args": []
     }

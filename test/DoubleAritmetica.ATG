@@ -1,0 +1,52 @@
+COMPILER Aritmetica    
+
+CHARACTERS 
+
+letter = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz". 
+digit = "0123456789" .
+tab = CHR(9).
+eol = CHR(10).
+
+KEYWORDS
+
+while = "while".
+do = "do".
+if = "if".
+switch = "switch".
+
+TOKENS
+
+ident = letter{letter|digit} EXCEPT KEYWORDS.
+number = digit{digit}.
+
+PRODUCTIONS
+
+Expr= {Stat (";")}".".
+
+Stat = 							(.var value int.)
+	Expression<&value>		(. fmt.Printf("%v\n", value) .)
+	.
+
+Expression<result *int> =		(.var result1,result2 int.)
+	Term<&result1>
+	{    "+"Term<&result2>		(.result1+=result2;.)
+	   | "-"Term<&result2>		(.result1-=result2;.)
+	}							(.*result = result1.)
+	.
+
+Term<result *int>=				(.var result1,result2 int.)
+	Factor<&result1>
+	{    "*"Factor<&result2>	(.result1*=result2;.)
+	   | "/"Factor<&result2>	(.result1/=result2;.)
+	}							(.*result = result1.)
+	.
+	
+Factor<result *int> =	(.var signo int =1.)
+	["-"(.signo = -1.)]
+	(	   Number<&result>
+		| "("Expression<&result>")"
+	) (.*result*=signo.).
+	
+Number<result *int> =  number  (. r, _ := strconv.Atoi(list[index-1].Lexema) .)
+	(. *result = r .).
+END Aritmetica
