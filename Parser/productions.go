@@ -385,6 +385,8 @@ func GetFirst(list []interface{}) []string {
 					return append(set, v.Lexema+params)
 				} else if v.ID == "string" || v.ID == "ident" {
 					return append(set, `"`+v.Lexema+`"`)
+				} else if v.ID == "token" {
+					return append(set, `token.NewToken("`+v.Lexema+`", "")`)
 				}
 			}
 		}
@@ -397,7 +399,7 @@ func GetTokenTranslation(tkn token.Token, isID bool) string {
 	switch tkn.ID {
 	case "iteration_start":
 		{
-			return "for true {" + linebreak
+			return "for status {" + linebreak
 		}
 	case "iteration_end":
 		{

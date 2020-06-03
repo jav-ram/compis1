@@ -1,52 +1,57 @@
-COMPILER Aritmetica    
+COMPILER Double    
 
 CHARACTERS 
 
-letter = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz". 
-digit = "0123456789" .
-tab = CHR(9).
-eol = CHR(10).
+digit="0123456789".
+tab=CHR(9).
+eol=CHR(10).
+blanco=eol+CHR(13)+tab.
 
 KEYWORDS
 
-while = "while".
+while ="while".
 do = "do".
-if = "if".
-switch = "switch".
 
 TOKENS
 
-ident = letter{letter|digit} EXCEPT KEYWORDS.
 number = digit{digit}.
+decnumber = digit{digit}"."digit{digit}.
+white = blanco{blanco}.
 
 PRODUCTIONS
 
-Expr= {Stat (";")}".".
+Expr= {Stat ";"{white}}{white}".".
 
-Stat = 							(.var value int.)
-	Expression<&value>		(. fmt.Printf("%v\n", value) .)
+Stat = 							(. var value float64 = 0.0 .)
+	Expression<&value>		(.fmt.Printf("Resultado: %v\n", value).)
 	.
 
-Expression<result *int> =		(.var result1,result2 int.)
+Expression<result *float64> =			(.var result1,result2 float64.)
 	Term<&result1>
-	{    "+"Term<&result2>		(.result1+=result2;.)
-	   | "-"Term<&result2>		(.result1-=result2;.)
-	}							(.*result = result1.)
+	{    "+"Term<&result2>		(.result1+=result2.)
+	   | "-"Term<&result2>		(.result1-=result2.)
+	}								(.*result=result1.)
 	.
 
-Term<result *int>=				(.var result1,result2 int.)
+Term<result *float64>=				(.var result1, result2 float64.)
 	Factor<&result1>
-	{    "*"Factor<&result2>	(.result1*=result2;.)
-	   | "/"Factor<&result2>	(.result1/=result2;.)
-	}							(.*result = result1.)
+	{    "*"Factor<&result2>	(.result1*=result2.)
+	   | "/"Factor<&result2>	(.result1/=result2.)
+	}							(.*result=result1.)
 	.
-	
-Factor<result *int> =	(.var signo int =1.)
-	["-"(.signo = -1.)]
-	(	   Number<&result>
-		| "("Expression<&result>")"
-	) (.*result*=signo.).
-	
-Number<result *int> =  number  (. r, _ := strconv.Atoi(list[index-1].Lexema) .)
-	(. *result = r .).
-END Aritmetica
+
+Factor<result *float64> =		(.var sign float64 = 1.)
+	["-"						(.sign = -1.)
+	]
+	(Number<result>
+	 |"("Expression<result>")"
+	)							(.*result*=sign;.)
+	.
+
+Number<result *float64> =	
+	(number				
+	|decnumber) (. r, _ := strconv.ParseFloat(lastToken.Lexema, 64) .)
+	(. *result = r .)
+	.
+
+END Double
